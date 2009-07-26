@@ -27,6 +27,8 @@ class Message(protected val owner : DeclActor) {
 }
 
 trait SyncMessage[R] {
+    this : Message =>
+    
     private final def checkType(x:Any)(implicit rClass : Manifest[R]) = rClass.erasure.isInstance(x)
     private final def throwError(x:Any)(implicit rClass : Manifest[R]) = throw new Error("Incorrect return type from " + this + " should be " + rClass + " was " + (x.asInstanceOf[AnyRef]).getClass + ".")
 
@@ -39,6 +41,10 @@ trait SyncMessage[R] {
         x.asInstanceOf[R]
     } else {
         throwError(x)
+    }
+
+    def reply(r:R) = {
+        owner.reply(r)
     }
 }
 

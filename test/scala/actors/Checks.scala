@@ -32,7 +32,7 @@ class Checks extends JUnit3Suite with Checkers {
                 case async2(s, s2) => pre = s; lastS2 = s2
                 case done() => new RuntimeException().printStackTrace(); reply(()); exit
                 case wrongType() => reply(pre)
-                case sync8(a, b, c, d, e, f, g, h) => reply((a, b, c, d, e, f, g, h))
+                case sync8(a, b, c, d, e, f, g, h) => sync8.reply((a, b, c, d, e, f, g, h))
             } }
     }
 
