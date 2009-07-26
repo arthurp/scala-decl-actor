@@ -10,7 +10,7 @@ package scala.actors
 import Actor._
 import scala.reflect.Manifest
 
-case class ActorMessage(msg:Message, args:Any)
+private[actors] case class ActorMessage(msg:Message, args:Any)
 
 class Message(protected val owner : DeclActor) {
     lazy val name : Option[String] = {
@@ -27,18 +27,18 @@ class Message(protected val owner : DeclActor) {
 }
 
 trait SyncMessage[R] {
-    protected def castReturnPartialFunc(implicit rClass : Manifest[R]) = new PartialFunction[Any, R] {
-        override def isDefinedAt(x: Any): Boolean = rClass.erasure.isInstance(x)
-        override def apply(x:Any): R = if (rClass.erasure.isInstance(x)) {
-            x.asInstanceOf[R]
-        } else {
-            throw new Error("Incorrect return type from " + this + " should be " + rClass + " was " + (x.asInstanceOf[AnyRef]).getClass + ".")
-        }
+    private final def checkType(x:Any)(implicit rClass : Manifest[R]) = rClass.erasure.isInstance(x)
+    private final def throwError(x:Any)(implicit rClass : Manifest[R]) = throw new Error("Incorrect return type from " + this + " should be " + rClass + " was " + (x.asInstanceOf[AnyRef]).getClass + ".")
+
+    protected final def castReturnPartialFunc(implicit rClass : Manifest[R]) = new PartialFunction[Any, R] {
+        override def isDefinedAt(x: Any): Boolean = checkType(x)
+        override def apply(x:Any): R = castReturn(x)
     }
 
-    protected def castReturn(v:AnyRef)(implicit rClass : Manifest[R]) = v match {
-        case r:R if rClass.erasure.isInstance(r) => r
-        case _ => throw new Error("Incorrect return type from " + this + " should be " + rClass + " was " + v.getClass + ".")
+    protected final def castReturn(x:Any)(implicit rClass : Manifest[R]) = if (checkType(x)) {
+        x.asInstanceOf[R]
+    } else {
+        throwError(x)
     }
 }
 
