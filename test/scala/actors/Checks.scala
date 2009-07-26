@@ -19,6 +19,7 @@ class Checks extends JUnit3Suite with Checkers {
         val sync2 = new SyncMessage2[String, Int, Int]
         val async = new AsyncMessage1[String]
         val async2 = new AsyncMessage2[String, String]
+        val sync8 = new SyncMessage8[(Int, Int, Int, Int, Int, Int, Int, Int), Int, Int, Int, Int, Int, Int, Int, Int]
         val done = new SyncMessage0[Unit]
         val wrongType = new SyncMessage0[Int]
 
@@ -31,6 +32,7 @@ class Checks extends JUnit3Suite with Checkers {
                 case async2(s, s2) => pre = s; lastS2 = s2
                 case done() => new RuntimeException().printStackTrace(); reply(()); exit
                 case wrongType() => reply(pre)
+                case sync8(a, b, c, d, e, f, g, h) => reply((a, b, c, d, e, f, g, h))
             } }
     }
 
@@ -45,6 +47,13 @@ class Checks extends JUnit3Suite with Checkers {
                 val f = a.sync !!(i)
                 f() == "("+i+")"
             } )
+    }
+
+    def testSync8 {
+        val ac = new Actor1
+        ac.start
+
+        check( (a:Int, b:Int, c:Int, d:Int) => { ac.sync8(a, b, c, d, a+b, b+c, c+d, d+a) == (a, b, c, d, a+b, b+c, c+d, d+a) } )
     }
 
     def testAsync1 {

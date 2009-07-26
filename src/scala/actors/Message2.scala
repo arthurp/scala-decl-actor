@@ -1,15 +1,8 @@
-/*
- * Message2.scala
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package scala.actors
 import scala.reflect.Manifest
 
 class Message2[A1, A2](owner : DeclActor) extends Message(owner) {
-    def unapply(v:Any) : Option[(A1,A2)] = v match {
+    def unapply(v:Any) : Option[(A1, A2)] = v match {
         case ActorMessage(src, (a1:A1, a2:A2)) if src eq this => Some((a1, a2))
         case _ => None
     }
