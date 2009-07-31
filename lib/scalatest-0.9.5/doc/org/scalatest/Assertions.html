@@ -1,0 +1,610 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+        <head><title>trait Assertions in org.scalatest</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF8"></meta><meta content="scaladoc (version 2.7.3.final)" name="generator"></meta><link href="../../style.css" type="text/css" rel="stylesheet"></link><script type="text/javascript" src="../../script.js"></script>
+        </head>
+        <body onload="init()">
+        <table summary="" class="navigation">
+        <tr>
+          <td class="navigation-links" valign="top">
+            <!-- <table><tr></tr></table> -->
+          </td>
+          <td align="right" valign="top" style="white-space:nowrap;" rowspan="2">
+            <div class="doctitle-larger">ScalaTest 0.9.5</div>
+          </td>
+        </tr>
+        <tr><td></td></tr>
+      </table>
+        
+      <div class="entity">
+        <a href="../../org/scalatest$package.html" target="_self">org.scalatest</a>
+        <br></br>
+        <span class="entity">trait  Assertions</span>
+      </div><hr></hr>
+      <div class="source">
+        [source: <a href="" class="org/scalatest/Assertions"><code>org/scalatest/Assertions.scala</code></a>]
+      </div><hr></hr>
+      <a name="Assertions"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>trait</code>
+        <em>Assertions</em>
+      </dt>
+      <dd><code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a></dd>
+    </dl>
+      <dl><dd>Trait that contains ScalaTest's basic assertion methods.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Author</b></dt><dd>Bill Venners</dd></dl>
+    <dl>
+      <dt style="margin:10px 0 0 20px;"><b>Direct Known Subclasses:</b></dt>
+      <dd><a href="../../org/scalatest/Assertions$object.html" target="_self">Assertions</a>, <a href="../../org/scalatest/Suite.html" target="_self">Suite</a>, <a href="../../org/scalatest/matchers/Matchers.html" target="_self">Matchers</a></dd>
+      </dl><hr></hr>
+      
+
+
+<table summary="" cellpadding="3" class="member">
+      <tr><td class="title" colspan="2">Method Summary</td></tr>
+      <tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#assert%28Boolean%29" target="_self">assert</a></em>
+        (<em>condition</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Assert that a boolean condition is true.
+   If the condition is <code>true</code>, this method returns normally.
+   Else, it throws <code>TestFailedException</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#assert%28Boolean%2CAny%29" target="_self">assert</a></em>
+        (<em>condition</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>, <em>message</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Assert that a boolean condition, described in <code>String</code>
+   <code>message</code>, is true.
+   If the condition is <code>true</code>, this method returns normally.
+   Else, it throws <code>TestFailedException</code> with the
+   <code>String</code> obtained by invoking <code>toString</code> on the
+   specified <code>message</code> as the exception's detail message.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#assert%28Option%5BString%5D%2CAny%29" target="_self">assert</a></em>
+        (<em>o</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>message</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Assert that an <code>Option[String]</code> is <code>None</code>. 
+   If the condition is <code>None</code>, this method returns normally.
+   Else, it throws <code>TestFailedException</code> with the <code>String</code>
+   value of the <code>Some</code>, as well as the 
+   <code>String</code> obtained by invoking <code>toString</code> on the
+   specified <code>message</code>,
+   included in the <code>TestFailedException</code>'s detail message.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#assert%28Option%5BString%5D%29" target="_self">assert</a></em>
+        (<em>o</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Assert that an <code>Option[String]</code> is <code>None</code>.
+   If the condition is <code>None</code>, this method returns normally.
+   Else, it throws <code>TestFailedException</code> with the <code>String</code>
+   value of the <code>Some</code> included in the <code>TestFailedException</code>'s
+   detail message.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>implicit def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#convertToEqualizer%28Any%29" target="_self">convertToEqualizer</a></em>
+        (<em>left</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="../../org/scalatest/Assertions.Equalizer.html" target="_self">Equalizer</a>
+        
+        <div>Implicit conversion from <code>Any</code> to <code>Equalizer</code>, used to enable
+   assertions with <code>===</code> comparisons. For more information
+   on this mechanism, see the <a href="Suite.Equalizer.html">documentation for </code>Equalizer</code></a>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#expect%28Any%29" target="_self">expect</a></em>
+        (<em>expected</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)(<em>actual</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Expect that the value passed as <code>expected</code> equals the value passed as <code>actual</code>.
+   If the <code>actual</code> value equals the <code>expected</code> value
+   (as determined by <code>==</code>), <code>expect</code> returns
+   normally. Else, <code>expect</code> throws an
+   <code>TestFailedException</code> whose detail message includes the expected and actual values.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#expect%28Any%2CAny%29" target="_self">expect</a></em>
+        (<em>expected</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>, <em>message</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)(<em>actual</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Expect that the value passed as <code>expected</code> equals the value passed as <code>actual</code>.
+   If the <code>actual</code> equals the <code>expected</code>
+   (as determined by <code>==</code>), <code>expect</code> returns
+   normally. Else, if <code>actual</code> is not equal to <code>expected</code>, <code>expect</code> throws an
+   <code>TestFailedException</code> whose detail message includes the expected and actual values, as well as the <code>String</code>
+   obtained by invoking <code>toString</code> on the passed <code>message</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#fail%28String%29" target="_self">fail</a></em>
+        (<em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Nothing.html" target="_self">Nothing</a>
+        
+        <div>Throws <code>TestFailedException</code>, with the passed
+   <code>String</code> <code>message</code> as the exception's detail
+   message, to indicate a test failed.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#fail%28Throwable%29" target="_self">fail</a></em>
+        (<em>cause</em> : <a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Nothing.html" target="_self">Nothing</a>
+        
+        <div>Throws <code>TestFailedException</code>, with the passed
+   <code>Throwable</code> cause, to indicate a test failed.
+   The <code>getMessage</code> method of the thrown <code>TestFailedException</code>
+   will return <code>cause.toString()</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#fail%28String%2CThrowable%29" target="_self">fail</a></em>
+        (<em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>cause</em> : <a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Nothing.html" target="_self">Nothing</a>
+        
+        <div>Throws <code>TestFailedException</code>, with the passed
+   <code>String</code> <code>message</code> as the exception's detail
+   message and <code>Throwable</code> cause, to indicate a test failed.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#fail%28%29" target="_self">fail</a></em>
+         : <a href="http://www.scala-lang.org/docu/files/api/scala/Nothing.html" target="_self">Nothing</a>
+        
+        <div>Throws <code>TestFailedException</code> to indicate a test failed.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%29" target="_self">intercept</a></em>
+        [<em>T</em> &lt;: <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>](<em>clazz</em> : <a href="" target="contentFrame" class="java/lang/Class">java.lang.Class</a>[<a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%29#T" target="_self">T</a>])(<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%29#T" target="_self">T</a>
+        
+        <div><b>Deprecated: use the more concise version of <code>intercept</code>, which uses an implicit manifest.</b> Intercept and return an instance of the passed exception class (or an instance of a subclass of the
+   passed class), which is expected to be thrown by the passed function value. This method invokes the passed
+   function. If it throws an exception that's an instance of the passed class or one of its
+   subclasses, this method returns that exception. Else, whether the passed function returns normally
+   or completes abruptly with a different exception, this method throws <code>TestFailedException</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%2CAny%29" target="_self">intercept</a></em>
+        [<em>T</em> &lt;: <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>](<em>clazz</em> : <a href="" target="contentFrame" class="java/lang/Class">java.lang.Class</a>[<a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%2CAny%29#T" target="_self">T</a>], <em>message</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)(<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%2CAny%29#T" target="_self">T</a>
+        
+        <div><b>Deprecated: use the more concise version of <code>intercept</code>, which uses an implicit manifest. Note: there is currently
+no version of the "implicit manifest" form of <code>intercept</code> that takes a string message. The reason is it won't overload while
+these older forms are still in the API. Once these deprecated forms are removed, an overloaded version of <code>intercept</code> that takes a string
+message and implicit manifest will be added.</b> Intercept and return an instance of the passed exception class (or an instance of a subclass of the
+   passed class), which is expected to be thrown by the passed function value. This method invokes the passed
+   function. If it throws an exception that's an instance of the passed class or one of its
+   subclasses, this method returns that exception. Else, whether the passed function returns normally
+   or completes abruptly with a different exception, this method throws <code>TestFailedException</code>
+   whose detail message includes the <code>String</code> obtained by invoking <code>toString</code> on the passed <code>message</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.html#intercept%28%3D%3EAny%29" target="_self">intercept</a></em>
+        [<em>T</em> &lt;: <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>](<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)(<code>implicit </code><em>manifest</em> : <a href="" target="contentFrame" class="scala/reflect/Manifest">scala.reflect.Manifest</a>[<a href="../../org/scalatest/Assertions.html#intercept%28%3D%3EAny%29#T" target="_self">T</a>]) : <a href="../../org/scalatest/Assertions.html#intercept%28%3D%3EAny%29#T" target="_self">T</a>
+        
+        <div>Intercept and return an exception that's expected to
+   be thrown by the passed function value. The thrown exception must be an instance of the
+   type specified by the type parameter of this method. This method invokes the passed
+   function. If the function throws an exception that's an instance of the specified type,
+   this method returns that exception. Else, whether the passed function returns normally
+   or completes abruptly with a different exception, this method throws <code>TestFailedException</code>.</div>
+      </td>
+    </tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#getClass%28%29" target="_self">getClass</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#hashCode%28%29" target="_self">hashCode</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#equals%28Any%29" target="_self">equals</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#clone%28%29" target="_self">clone</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#toString%28%29" target="_self">toString</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#notify%28%29" target="_self">notify</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#notifyAll%28%29" target="_self">notifyAll</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28Long%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28Long%2CInt%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#finalize%28%29" target="_self">finalize</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#%3D%3D%28AnyRef%29" target="_self">==</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#%21%3D%28AnyRef%29" target="_self">!=</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#eq%28AnyRef%29" target="_self">eq</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#ne%28AnyRef%29" target="_self">ne</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#synchronized%28T0%29" target="_self">synchronized</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#%3D%3D%28Any%29" target="_self">==</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#%21%3D%28Any%29" target="_self">!=</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#isInstanceOf" target="_self">isInstanceOf</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#asInstanceOf" target="_self">asInstanceOf</a>
+        </td></tr>
+      </table>
+<table summary="" cellpadding="3" class="member">
+      <tr><td class="title" colspan="2">Class Summary</td></tr>
+      <tr>
+      <td class="modifiers" valign="top"> 
+        <code> class</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/Assertions.Equalizer.html" target="_self">Equalizer</a></em>
+        (<em>left</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)<code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Class used via an implicit conversion to enable any two objects to be compared with
+   <code>===</code> in assertions in tests. For example:
+  
+   <pre>
+   assert(a === b)
+   </pre></div>
+      </td>
+    </tr>
+      </table>
+
+      
+
+
+<table summary="" cellpadding="3" class="member-detail">
+          <tr><td class="title">Method Details</td></tr>
+        </table><div><a name="assert%28Boolean%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>assert</em>(<em>condition</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Assert that a boolean condition is true.
+   If the condition is <code>true</code>, this method returns normally.
+   Else, it throws <code>TestFailedException</code>.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>condition - </code>the boolean condition to assert</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the condition is <code>false</code>.</dd></dl>
+    <hr></hr>
+<a name="assert%28Boolean%2CAny%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>assert</em>(<em>condition</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>, <em>message</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Assert that a boolean condition, described in <code>String</code>
+   <code>message</code>, is true.
+   If the condition is <code>true</code>, this method returns normally.
+   Else, it throws <code>TestFailedException</code> with the
+   <code>String</code> obtained by invoking <code>toString</code> on the
+   specified <code>message</code> as the exception's detail message.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>condition - </code>the boolean condition to assert</dd><dd><code>message - </code>An objects whose <code>toString</code> method returns a message to include in a failure report.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the condition is <code>false</code>.</dd><dd><code>NullPointerException - </code>if <code>message</code> is <code>null</code>.</dd></dl>
+    <hr></hr>
+<a name="assert%28Option%5BString%5D%2CAny%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>assert</em>(<em>o</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>message</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Assert that an <code>Option[String]</code> is <code>None</code>. 
+   If the condition is <code>None</code>, this method returns normally.
+   Else, it throws <code>TestFailedException</code> with the <code>String</code>
+   value of the <code>Some</code>, as well as the 
+   <code>String</code> obtained by invoking <code>toString</code> on the
+   specified <code>message</code>,
+   included in the <code>TestFailedException</code>'s detail message.
+  
+   <p>
+   This form of <code>assert</code> is usually called in conjunction with an
+   implicit conversion to <code>Equalizer</code>, using a <code>===</code> comparison, as in:
+   </p>
+  
+   <pre>
+   assert(a === b, "extra info reported if assertion fails")
+   </pre>
+  
+   <p>
+   For more information on how this mechanism works, see the <a href="Suite.Equalizer.html">documentation for
+   <code>Equalizer</code></a>.
+   </p></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>o - </code>the <code>Option[String]</code> to assert</dd><dd><code>message - </code>An objects whose <code>toString</code> method returns a message to include in a failure report.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the <code>Option[String]</code> is <code>Some</code>.</dd><dd><code>NullPointerException - </code>if <code>message</code> is <code>null</code>.</dd></dl>
+    <hr></hr>
+<a name="assert%28Option%5BString%5D%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>assert</em>(<em>o</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Assert that an <code>Option[String]</code> is <code>None</code>.
+   If the condition is <code>None</code>, this method returns normally.
+   Else, it throws <code>TestFailedException</code> with the <code>String</code>
+   value of the <code>Some</code> included in the <code>TestFailedException</code>'s
+   detail message.
+  
+   <p>
+   This form of <code>assert</code> is usually called in conjunction with an
+   implicit conversion to <code>Equalizer</code>, using a <code>===</code> comparison, as in:
+   </p>
+  
+   <pre>
+   assert(a === b)
+   </pre>
+  
+   <p>
+   For more information on how this mechanism works, see the <a href="Suite.Equalizer.html">documentation for
+   <code>Equalizer</code></a>.
+   </p></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>o - </code>the <code>Option[String]</code> to assert</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the <code>Option[String]</code> is <code>Some</code>.</dd></dl>
+    <hr></hr>
+<a name="convertToEqualizer%28Any%29"></a><dl>
+      <dt>
+        
+        <code>implicit</code>
+        <code>def</code>
+        <em>convertToEqualizer</em>(<em>left</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="../../org/scalatest/Assertions.Equalizer.html" target="_self">Equalizer</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Implicit conversion from <code>Any</code> to <code>Equalizer</code>, used to enable
+   assertions with <code>===</code> comparisons. For more information
+   on this mechanism, see the <a href="Suite.Equalizer.html">documentation for </code>Equalizer</code></a>.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>left - </code>the object whose type to convert to <code>Equalizer</code>.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if <code>left</code> is <code>null</code>.</dd></dl>
+    <hr></hr>
+<a name="intercept%28java.lang.Class%5BT%5D%2CAny%29"></a><dl>
+      <dt>
+        @<a href="" target="contentFrame" class="scala/deprecated">scala.deprecated</a><br></br>
+        <code></code>
+        <code>def</code>
+        <em>intercept</em>[<em>T</em> &lt;: <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>](<em>clazz</em> : <a href="" target="contentFrame" class="java/lang/Class">java.lang.Class</a>[<a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%2CAny%29#T" target="_self">T</a>], <em>message</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)(<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%2CAny%29#T" target="_self">T</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd><b>Deprecated: use the more concise version of <code>intercept</code>, which uses an implicit manifest. Note: there is currently
+no version of the "implicit manifest" form of <code>intercept</code> that takes a string message. The reason is it won't overload while
+these older forms are still in the API. Once these deprecated forms are removed, an overloaded version of <code>intercept</code> that takes a string
+message and implicit manifest will be added.</b> Intercept and return an instance of the passed exception class (or an instance of a subclass of the
+   passed class), which is expected to be thrown by the passed function value. This method invokes the passed
+   function. If it throws an exception that's an instance of the passed class or one of its
+   subclasses, this method returns that exception. Else, whether the passed function returns normally
+   or completes abruptly with a different exception, this method throws <code>TestFailedException</code>
+   whose detail message includes the <code>String</code> obtained by invoking <code>toString</code> on the passed <code>message</code>.
+  
+   <p>
+   Note that the passed <code>Class</code> may represent any type, not just <code>Throwable</code> or one of its subclasses. In
+   Scala, exceptions can be caught based on traits they implement, so it may at times make sense to pass in a class instance for
+   a trait. If a class instance is passed for a type that could not possibly be used to catch an exception (such as <code>String</code>,
+   for example), this method will complete abruptly with a <code>TestFailedException</code>.
+   </p></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>clazz - </code>a type to which the expected exception class is assignable, i.e., the exception should be an instance of the type represented by <code>clazz</code>.</dd><dd><code>message - </code>An objects whose <code>toString</code> method returns a message to include in a failure report.</dd><dd><code>f - </code>the function value that should throw the expected exception</dd><dt style="margin:10px 0 0 20px;">
+        <b>Returns</b></dt><dd>the intercepted exception, if</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the passed function does not result in a value equal to the       passed <code>expected</code> value.</dd></dl>
+    <hr></hr>
+<a name="intercept%28java.lang.Class%5BT%5D%29"></a><dl>
+      <dt>
+        @<a href="" target="contentFrame" class="scala/deprecated">scala.deprecated</a><br></br>
+        <code></code>
+        <code>def</code>
+        <em>intercept</em>[<em>T</em> &lt;: <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>](<em>clazz</em> : <a href="" target="contentFrame" class="java/lang/Class">java.lang.Class</a>[<a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%29#T" target="_self">T</a>])(<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%29#T" target="_self">T</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd><b>Deprecated: use the more concise version of <code>intercept</code>, which uses an implicit manifest.</b> Intercept and return an instance of the passed exception class (or an instance of a subclass of the
+   passed class), which is expected to be thrown by the passed function value. This method invokes the passed
+   function. If it throws an exception that's an instance of the passed class or one of its
+   subclasses, this method returns that exception. Else, whether the passed function returns normally
+   or completes abruptly with a different exception, this method throws <code>TestFailedException</code>.
+  
+   <p>
+   Note that the passed <code>Class</code> may represent any type, not just <code>Throwable</code> or one of its subclasses. In
+   Scala, exceptions can be caught based on traits they implement, so it may at times make sense to pass in a class instance for
+   a trait. If a class instance is passed for a type that could not possibly be used to catch an exception (such as <code>String</code>,
+   for example), this method will complete abruptly with a <code>TestFailedException</code>.
+   </p></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>clazz - </code>a type to which the expected exception class is assignable, i.e., the exception should be an instance of the type represented by <code>clazz</code>.</dd><dd><code>f - </code>the function value that should throw the expected exception</dd><dt style="margin:10px 0 0 20px;">
+        <b>Returns</b></dt><dd>the intercepted exception, if</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the passed function does not complete abruptly with an exception that is assignable to the       passed <code>Class</code>.</dd><dd><code>IllegalArgumentException - </code>if the passed <code>clazz</code> is not <code>Throwable</code> or       one of its subclasses.</dd></dl>
+    <hr></hr>
+<a name="intercept%28%3D%3EAny%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>intercept</em>[<em>T</em> &lt;: <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>](<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)(<code>implicit </code><em>manifest</em> : <a href="" target="contentFrame" class="scala/reflect/Manifest">scala.reflect.Manifest</a>[<a href="../../org/scalatest/Assertions.html#intercept%28%3D%3EAny%29#T" target="_self">T</a>]) : <a href="../../org/scalatest/Assertions.html#intercept%28%3D%3EAny%29#T" target="_self">T</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Intercept and return an exception that's expected to
+   be thrown by the passed function value. The thrown exception must be an instance of the
+   type specified by the type parameter of this method. This method invokes the passed
+   function. If the function throws an exception that's an instance of the specified type,
+   this method returns that exception. Else, whether the passed function returns normally
+   or completes abruptly with a different exception, this method throws <code>TestFailedException</code>.
+  
+   <p>
+   Note that the type specified as this method's type parameter may represent any subtype of
+   <code>AnyRef</code>, not just <code>Throwable</code> or one of its subclasses. In
+   Scala, exceptions can be caught based on traits they implement, so it may at times make sense
+   to specify a trait that the intercepted exception's class must mix in. If a class instance is
+   passed for a type that could not possibly be used to catch an exception (such as <code>String</code>,
+   for example), this method will complete abruptly with a <code>TestFailedException</code>.
+   </p></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function value that should throw the expected exception</dd><dd><code>manifest - </code>an implicit <code>Manifest</code> representing the type of the specified   type parameter.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Returns</b></dt><dd>the intercepted exception, if it is of the expected type</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the passed function does not complete abruptly with an exception      that's an instance of the specified type
+       passed <code>expected</code> value.</dd></dl>
+    <hr></hr>
+<a name="expect%28Any%2CAny%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>expect</em>(<em>expected</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>, <em>message</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)(<em>actual</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Expect that the value passed as <code>expected</code> equals the value passed as <code>actual</code>.
+   If the <code>actual</code> equals the <code>expected</code>
+   (as determined by <code>==</code>), <code>expect</code> returns
+   normally. Else, if <code>actual</code> is not equal to <code>expected</code>, <code>expect</code> throws an
+   <code>TestFailedException</code> whose detail message includes the expected and actual values, as well as the <code>String</code>
+   obtained by invoking <code>toString</code> on the passed <code>message</code>.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>expected - </code>the expected value</dd><dd><code>message - </code>An object whose <code>toString</code> method returns a message to include in a failure report.</dd><dd><code>actual - </code>the actual value, which should equal the passed <code>expected</code> value</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the passed <code>actual</code> value does not equal the passed <code>expected</code> value.</dd></dl>
+    <hr></hr>
+<a name="expect%28Any%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>expect</em>(<em>expected</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>)(<em>actual</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Expect that the value passed as <code>expected</code> equals the value passed as <code>actual</code>.
+   If the <code>actual</code> value equals the <code>expected</code> value
+   (as determined by <code>==</code>), <code>expect</code> returns
+   normally. Else, <code>expect</code> throws an
+   <code>TestFailedException</code> whose detail message includes the expected and actual values.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>expected - </code>the expected value</dd><dd><code>actual - </code>the actual value, which should equal the passed <code>expected</code> value</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if the passed <code>actual</code> value does not equal the passed <code>expected</code> value.</dd></dl>
+    <hr></hr>
+<a name="fail%28%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>fail</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Nothing.html" target="_self">Nothing</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Throws <code>TestFailedException</code> to indicate a test failed.</dd></dl>
+      <dl></dl>
+    <hr></hr>
+<a name="fail%28String%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>fail</em>(<em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Nothing.html" target="_self">Nothing</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Throws <code>TestFailedException</code>, with the passed
+   <code>String</code> <code>message</code> as the exception's detail
+   message, to indicate a test failed.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>message - </code>A message describing the failure.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if <code>message</code> is <code>null</code></dd></dl>
+    <hr></hr>
+<a name="fail%28String%2CThrowable%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>fail</em>(<em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>cause</em> : <a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Nothing.html" target="_self">Nothing</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Throws <code>TestFailedException</code>, with the passed
+   <code>String</code> <code>message</code> as the exception's detail
+   message and <code>Throwable</code> cause, to indicate a test failed.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>message - </code>A message describing the failure.</dd><dd><code>cause - </code>A <code>Throwable</code> that indicates the cause of the failure.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if <code>message</code> or <code>cause</code> is <code>null</code></dd></dl>
+    <hr></hr>
+<a name="fail%28Throwable%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>fail</em>(<em>cause</em> : <a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Nothing.html" target="_self">Nothing</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Throws <code>TestFailedException</code>, with the passed
+   <code>Throwable</code> cause, to indicate a test failed.
+   The <code>getMessage</code> method of the thrown <code>TestFailedException</code>
+   will return <code>cause.toString()</code>.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>cause - </code>a <code>Throwable</code> that indicates the cause of the failure.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if <code>cause</code> is <code>null</code></dd></dl>
+    <hr></hr></div>
+
+
+    <hr></hr>
+        <div>Copyright (C) 2001-2009 Artima, Inc. All rights reserved.</div><table summary="" class="navigation">
+        <tr>
+          <td class="navigation-links" valign="top">
+            <!-- <table><tr></tr></table> -->
+          </td>
+          <td align="right" valign="top" style="white-space:nowrap;" rowspan="2">
+            <div class="doctitle-larger">ScalaTest 0.9.5</div>
+          </td>
+        </tr>
+        <tr><td></td></tr>
+      </table>
+      </body>
+      </html>

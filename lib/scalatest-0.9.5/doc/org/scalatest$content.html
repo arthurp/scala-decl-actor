@@ -1,0 +1,417 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+        <head><title>All classes and objects in org.scalatest</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF8"></meta><meta content="scaladoc (version 2.7.3.final)" name="generator"></meta><link href="../style.css" type="text/css" rel="stylesheet"></link><script type="text/javascript" src="../script.js"></script>
+        </head>
+        <body onload="init()"><div class="page-title"><div>ScalaTest 0.9.5</div></div><p><div>This document is the API specification for ScalaTest 0.9.5</div></p><table summary="" cellpadding="3" class="member">
+        <tr><td class="title" colspan="2">Class Summary</td></tr>
+        <tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Assertions.html" target="_self">Assertions</a></em>
+        <code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Trait that contains ScalaTest's basic assertion methods.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/BeforeAndAfter.html" target="_self">BeforeAndAfter</a></em>
+        <code> extends </code><a href="../org/scalatest/ExecuteAndRun.html" target="_self">ExecuteAndRun</a><code> with </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Trait that can be mixed into suites that need methods invoked before and after executing the
+ suite, and/or before and after running each test. This trait facilitates a style of testing in which mutable
+ fixture objects held in instance variables are replaced or reinitialized before each test or
+ suite. Here's an example:
+ 
+ <pre>
+ import org.scalatest._
+ import scala.collection.mutable.ListBuffer
+
+ class MySuite extends BeforeAndAfter {
+
+   // Fixtures as reassignable variables and mutable objects
+   var sb: StringBuilder = _
+   val lb = new ListBuffer[String]
+ 
+   override def beforeEach() {
+     sb = new StringBuilder("ScalaTest is ")
+     lb.clear()
+   }
+
+   def testEasy() {
+     sb.append("easy!")
+     assert(sb.toString === "ScalaTest is easy!")
+     assert(lb.isEmpty)
+     lb += "sweet"
+   }
+
+   def testFun() {
+     sb.append("fun!")
+     assert(sb.toString === "ScalaTest is fun!")
+     assert(lb.isEmpty)
+   }
+ }
+ </pre></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Distributor.html" target="_self">Distributor</a></em>
+        <code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/ExecuteAndRun.html" target="_self">ExecuteAndRun</a></em>
+        <code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Trait that abstracts out the <code>execute</code> and <code>runTest</code> methods of <code>Suite</code>. This
+ trait exists to support the use of trait <code>BeforeAndAfter</code>, which is a direct subtrait of this trait. The
+ <code>BeforeAndAfter</code> trait's implementation of <code>runTest</code> surrounds an invocation of
+ <code>super.runTest</code> in calls to <code>beforeEach</code> and <code>afterEach</code>. Similarly, the
+ <code>BeforeAndAfter</code> trait's implementation of <code>execute</code> surrounds an invocation of
+ <code>super.execute</code> in calls to <code>beforeAll</code> and <code>afterAll</code>. This enables trait
+ <code>BeforeAndAfter</code> to be mixed into any <code>Suite</code>, but not into a trait that contains shared examples
+ for a <code>Spec<code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/FunSuite.html" target="_self">FunSuite</a></em>
+        <code> extends </code><a href="../org/scalatest/Suite.html" target="_self">Suite</a>
+        
+        <div>A suite of tests in which each test is represented as a function value. The &#8220;<code>Fun</code>&#8221; in <code>FunSuite</code> stands for functional.
+ Here's an example <code>FunSuite</code>:
+
+ <pre>
+ import org.scalatest.FunSuite
+
+ class MySuite extends FunSuite {
+
+   test("addition") {
+     val sum = 1 + 1
+     assert(sum === 2)
+     assert(sum + 2 === 4)
+   }
+
+   test("subtraction") {
+     val diff = 4 - 1
+     assert(diff === 3)
+     assert(diff - 2 === 1)
+   }
+ }
+ </pre></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>abstract class</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Group.html" target="_self">Group</a></em>
+        (<code>val </code><em>name</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>)<code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Abstract class whose subclasses can be passed to <code>FunSuite</code> and <code>Spec</code> test
+ registration methods to place tests into groups. For example, if you define:
+ <pre>
+ object SlowTest extends Group("SlowTest")
+ </pre>
+
+ then you can place a test into the <code>SlowTest</code> group like this:
+ <pre>
+ import org.scalatest.FunSuite
+
+ class MySuite extends FunSuite {
+
+   test("my test", SlowTest) {
+     Thread.sleep(1000)
+   }
+ }
+ </pre></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/ImpSuite.html" target="_self">ImpSuite</a></em>
+        <code> extends </code><a href="../org/scalatest/Suite.html" target="_self">Suite</a>
+        
+        <div><strong>Deprecated: Use trait <code>BeforeAndAfter</code> instead. This trait will be removed in a future version of ScalaTest.</strong> Trait that can be mixed into suites that need methods invoked before and after executing the
+ suite, and/or before and after running each test. The "imp" in <code>ImpSuite</code> stands
+ for <em>imperative</em>, because this trait facilitates a style of testing in which mutable
+ fixture objects held in instance variables are replaced or reinitialized before each test or
+ suite. Here's an example:
+ 
+ <pre>
+ import org.scalatest._
+ import scala.collection.mutable.ListBuffer
+
+ class MySuite extends ImpSuite {
+
+   // Fixtures as reassignable variables and mutable objects
+   var sb: StringBuilder = _
+   val lb = new ListBuffer[String]
+ 
+   override def beforeEach() {
+     sb = new StringBuilder("ScalaTest is ")
+     lb.clear()
+   }
+
+   def testEasy() {
+     sb.append("easy!")
+     assert(sb.toString === "ScalaTest is easy!")
+     assert(lb.isEmpty)
+     lb += "sweet"
+   }
+
+   def testFun() {
+     sb.append("fun!")
+     assert(sb.toString === "ScalaTest is fun!")
+     assert(lb.isEmpty)
+   }
+ }
+ </pre></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Informer.html" target="_self">Informer</a></em>
+        <code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Trait to which custom information about a running suite of tests can be reported.
+ <code>Informer</code> contains two <code>apply</code> methods, one which takes
+ a string and the other a <code>Report</code>. An <code>Informer</code> is essentially
+ used to wrap a <code>Reporter</code> and provide easy ways to send custom information
+ to that <code>Reporter</code> via its <code>infoProvided</code> method.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/PrivateMethodTester.html" target="_self">PrivateMethodTester</a></em>
+        <code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Trait that facilitates the testing of private methods.
+
+ To test a private method, mix in trait <code>PrivateMethodTester</code> and
+ create a <code>PrivateMethod</code> object, like this: 
+
+ <pre>
+ val decorateToStringValue = PrivateMethod[String]('decorateToStringValue)
+ </pre></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> class</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Report.html" target="_self">Report</a></em>
+        (<code>val </code><em>name</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>throwable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>], <code>val </code><em>rerunnable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="../org/scalatest/Rerunnable.html" target="_self">Rerunnable</a>], <code>val </code><em>threadName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>date</em> : <a href="" target="contentFrame" class="java/util/Date">java.util.Date</a>)<code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Reporter.html" target="_self">Reporter</a></em>
+        <code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Trait whose instances collect the results of a running
+ suite of tests and presents those results in some way to the user.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Rerunnable.html" target="_self">Rerunnable</a></em>
+        <code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Trait whose instances can rerun tests or other entities (such as suites). An object extending
+ this trait can be passed to a <code>Reporter</code> as part of a <code>Report</code>. The
+ test or other entity about which the report is made can then be rerun by invoking the
+ <code>rerun</code> method on the <code>Rerunnable</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Spec.html" target="_self">Spec</a></em>
+        <code> extends </code><a href="../org/scalatest/Suite.html" target="_self">Suite</a>
+        
+        <div>Trait that facilitates a &#8220;behavior-driven&#8221; style of development (BDD), in which tests
+ are combined with text that specifies the behavior the tests verify.
+ Here's an example <code>Spec</code>:
+
+ <pre>
+ import org.scalatest.Spec
+ import scala.collection.mutable.Stack
+
+ class StackSpec extends Spec {
+
+   describe("A Stack") {
+
+     it("should pop values in last-in-first-out order") {
+       val stack = new Stack[Int]
+       stack.push(1)
+       stack.push(2)
+       assert(stack.pop() === 2)
+       assert(stack.pop() === 1)
+     }
+
+     it("should throw NoSuchElementException if an empty stack is popped") {
+       val emptyStack = new Stack[String]
+       intercept[NoSuchElementException] {
+         emptyStack.pop()
+       }
+     }
+   }
+ }
+ </pre></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> class</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/SpecReport.html" target="_self">SpecReport</a></em>
+        (<code>val override </code><em>name</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val override </code><em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>plainSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>formattedSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>includeInSpecOutput</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>, <code>val override </code><em>throwable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>], <code>val override </code><em>rerunnable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="../org/scalatest/Rerunnable.html" target="_self">Rerunnable</a>], <code>val override </code><em>threadName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val override </code><em>date</em> : <a href="" target="contentFrame" class="java/util/Date">java.util.Date</a>)<code> extends </code><a href="../org/scalatest/Report.html" target="_self">Report</a>
+        
+        <div></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Stopper.html" target="_self">Stopper</a></em>
+        <code> extends </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Trait whose instances can indicate whether a stop has been requested. This is passed in
+ to the <code>execute</code> method of <code>Suite</code>, so that running suites of tests can be
+ requested to stop early.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Suite.html" target="_self">Suite</a></em>
+        <code> extends </code><a href="../org/scalatest/Assertions.html" target="_self">Assertions</a><code> with </code><a href="../org/scalatest/ExecuteAndRun.html" target="_self">ExecuteAndRun</a>
+        
+        <div></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> class</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/SuperSuite.html" target="_self">SuperSuite</a></em>
+        (<code>val override </code><em>nestedSuites</em> : <a href="" target="contentFrame" class="scala/List">scala.List</a>[<a href="../org/scalatest/Suite.html" target="_self">Suite</a>])<code> extends </code><a href="../org/scalatest/Suite.html" target="_self">Suite</a>
+        
+        <div>A <code>Suite</code> class that takes a <code>List[Suite]</code> parameter, which overrides
+ the <code>nestedSuites</code> method of trait <code>Suite</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> class</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/TestFailedException.html" target="_self">TestFailedException</a></em>
+        (<code>val </code><em>message</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <code>val </code><em>cause</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>], <code>val </code><em>failedTestCodeStackDepth</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Int.html" target="_self">Int</a>)<code> extends </code><a href="" target="contentFrame" class="java/lang/RuntimeException">java.lang.RuntimeException</a><code> with </code><a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        
+        <div>Exception that indicates a test failed. The purpose of this exception is to encapsulate information about
+ the stack depth at which the line of test code that failed resides, so that information can be presented to
+ the user that makes it quick to find the failing line of test code. (I.e., the user need not scan through the
+ stack trace to find the correct filename and line number of the failing test.)</div>
+      </td>
+    </tr>        
+        </table>
+<table summary="" cellpadding="3" class="member">
+        <tr><td class="title" colspan="2">Object Summary</td></tr>
+        <tr>
+      <td class="modifiers" valign="top"> 
+        <code> object</code>
+      </td>
+      <td class="signature">
+        <em><a href="../org/scalatest/Assertions$object.html" target="_self">Assertions</a></em>
+        <code> extends </code><a href="../org/scalatest/Assertions.html" target="_self">Assertions</a>
+        
+        <div>Companion object that facilitates the importing of <code>Assertions</code> members as 
+ an alternative to mixing it in. One use case is to import <code>Assertions</code> members so you can use
+ them in the Scala interpreter:
+
+ <pre>
+ $scala -classpath scalatest.jar
+ Welcome to Scala version 2.7.3.final (Java HotSpot(TM) Client VM, Java 1.5.0_16).
+ Type in expressions to have them evaluated.
+ Type :help for more information.
+ 
+ scala> import org.scalatest.Assertions._
+ import org.scalatest.Assertions._
+ 
+ scala> assert(1 === 2)
+ org.scalatest.TestFailedException: 1 did not equal 2
+ 	at org.scalatest.Assertions$class.assert(Assertions.scala:211)
+ 	at org.scalatest.Assertions$.assert(Assertions.scala:511)
+ 	at .<init>(<console>:7)
+ 	at .<clinit>(<console>)
+ 	at RequestResult$.<init>(<console>:3)
+ 	at RequestResult$.<clinit>(<console>)
+ 	at RequestResult$result(<console>)
+ 	at sun.reflect.NativeMethodAccessorImpl.invoke...
+
+ scala> expect(3) { 1 + 3 }
+ org.scalatest.TestFailedException: Expected 3, but got 4
+ 	at org.scalatest.Assertions$class.expect(Assertions.scala:447)
+ 	at org.scalatest.Assertions$.expect(Assertions.scala:511)
+ 	at .<init>(<console>:7)
+ 	at .<clinit>(<console>)
+ 	at RequestResult$.<init>(<console>:3)
+ 	at RequestResult$.<clinit>(<console>)
+ 	at RequestResult$result(<console>)
+ 	at sun.reflect.NativeMethodAccessorImpl.in...
+
+ scala> val caught = intercept[StringIndexOutOfBoundsException] { "hi".charAt(-1) }
+ caught: StringIndexOutOfBoundsException = java.lang.StringIndexOutOfBoundsException: String index out of range: -1
+ <pre></div>
+      </td>
+    </tr>        
+        </table></body>
+      </html>

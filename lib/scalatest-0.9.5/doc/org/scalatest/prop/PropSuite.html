@@ -1,0 +1,783 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+        <head><title>trait PropSuite in org.scalatest.prop</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF8"></meta><meta content="scaladoc (version 2.7.3.final)" name="generator"></meta><link href="../../../style.css" type="text/css" rel="stylesheet"></link><script type="text/javascript" src="../../../script.js"></script>
+        </head>
+        <body onload="init()">
+        <table summary="" class="navigation">
+        <tr>
+          <td class="navigation-links" valign="top">
+            <!-- <table><tr></tr></table> -->
+          </td>
+          <td align="right" valign="top" style="white-space:nowrap;" rowspan="2">
+            <div class="doctitle-larger">ScalaTest 0.9.5</div>
+          </td>
+        </tr>
+        <tr><td></td></tr>
+      </table>
+        
+      <div class="entity">
+        <a href="../../../org/scalatest/prop$package.html" target="_self">org.scalatest.prop</a>
+        <br></br>
+        <span class="entity">trait  PropSuite</span>
+      </div><hr></hr>
+      <div class="source">
+        [source: <a href="" class="org/scalatest/prop/PropSuite"><code>org/scalatest/prop/PropSuite.scala</code></a>]
+      </div><hr></hr>
+      <a name="PropSuite"></a><dl>
+      <dt>
+        @<a href="" target="contentFrame" class="scala/deprecated">scala.deprecated</a><br></br>
+        <code></code>
+        <code>trait</code>
+        <em>PropSuite</em>
+      </dt>
+      <dd><code> extends </code><a href="../../../org/scalatest/FunSuite.html" target="_self">FunSuite</a><code> with </code><a href="../../../org/scalatest/prop/Checkers.html" target="_self">Checkers</a></dd>
+    </dl>
+      <dl><dd><strong>Deprecated: mix in <code>Checkers</code> and make explicit calls to <code>check</code> instead. This trait will be removed in a future version of ScalaTest.</strong> 
+
+ <p>
+ So instead of this:
+
+ <pre>
+   test(
+     "list concatenation using a test method",
+     (a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size
+   )
+ </pre>
+ <p>
+ You'd say this:
+ </p>
+ <pre>
+   test("list concatenation using a test method") {
+     check((a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size)
+   }
+ </pre>
+
+ <p>
+ I decided that this form isn't much more difficult to write, and is more readable because it looks like any
+ other test function, and always having the word "check" present when there's a property check is a good signal
+ that ScalaCheck is being used. I will delete PropSuite in a future release of ScalaTest.
+ </p>
+ <p>
+ A <code>FunSuite</code> subtrait that provides methods that perform
+ ScalaCheck property checks.
+ If ScalaCheck, when invoked via one of the methods provided by <cod>PropSuite</code>, finds a test case for which a property doesn't hold, the problem will be reported as a ScalaTest test failure.
+ </p>
+ <p>
+ To use ScalaCheck, you specify properties and, in some cases, generators that generate test data. Often you need not 
+ provide generators, because ScalaCheck provides many default generators that you can use in many situations.
+ ScalaCheck will use the generators to generate test data and with that data run tests that check that the property holds.
+ Property-based tests can, therefore, can give you a lot more testing for a lot less code than assertion-based tests.
+ Here's an example of using ScalaCheck from a <code>PropSuite</code>:
+ </p>
+
+ <pre>
+ import org.scalatest.prop.PropSuite
+ import org.scalacheck.Arbitrary._
+ import org.scalacheck.Prop._
+
+ class MySuite extends PropSuite {
+
+   test("list concatenation") {
+ 
+     val x = List(1, 2, 3)
+     val y = List(4, 5, 6)
+     assert(x ::: y === List(1, 2, 3, 4, 5, 6))
+
+     check((a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size)
+   }
+
+   test(
+     "list concatenation using a test method",
+     (a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size
+   )
+ }
+ </pre>
+
+ <p>
+ <code>PropSuite</code> mixes in trait <code>Checkers</code>, so you can call any of its
+ <code>check</code> methods inside a test function. This is shown in the first test:
+ </p>
+ <pre>
+ test("list concatenation") {
+ 
+   val x = List(1, 2, 3)
+   val y = List(4, 5, 6)
+   assert(x ::: y === List(1, 2, 3, 4, 5, 6))
+
+   check((a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size)
+ }
+ </pre>
+
+ <p>
+ The <code>check</code> methods provided by <code>Checkers</code> allow you to combine assertion- and property-based
+ testing in the same test function. If you want to define a test that is composed only
+ of a single property check, you can use one of several <code>test</code> methods
+ <code>PropSuite</code> defines. These <code>test</code> methods allow you to
+ register just a property as a test function. This is shown in the previous example
+ in the second test:
+
+ <pre>
+ test(
+   "list concatenation using a test method",
+   (a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size
+ )
+ </pre>
+
+ <p>
+ Here are a few other examples:
+ </p>
+
+ <pre>
+ import org.scalatest.prop.PropSuite
+
+ class StringSuite extends PropSuite {
+
+   test("startsWith", (a: String, b: String) => (a + b).startsWith(a))
+
+   test("endsWith", (a: String, b: String) => (a + b).endsWith(b))
+
+   test(
+     "substring should start from passed index and go to end of string",
+     (a: String, b: String) => (a + b).substring(a.length) == b
+   )
+
+   test(
+     "substring should start at passed index and extract passed number of chars",
+     (a: String, b: String, c: String) => (a + b + c).substring(a.length, a.length + b.length) == b
+   )
+ }
+ </pre>
+
+ <p>
+ <strong>Test groups</strong>
+ </p>
+
+ <p>
+ A <code>PropSuite</code>'s tests may be classified into named <em>groups</em> in
+ the same manner as its supertrait <code>FunSuite</code>.
+ As with any suite, when executing a <code>PropSuite</code>, groups of tests can
+ optionally be included and/or excluded. To place <code>PropSuite</code> tests into
+ groups, you pass objects that extend abstract class <code>org.scalatest.Group</code> to methods
+ that register tests. Class <code>Group</code> takes one type parameter, a string name.  If you have
+ created Java annotation interfaces for use as group names in direct subclasses of <code>org.scalatest.Suite</code>,
+ then you will probably want to use group names on your <code>FunSuite</code>s that match. To do so, simply 
+ pass the fully qualified names of the Java interfaces to the <code>Group</code> constructor. For example, if you've
+ defined Java annotation interfaces with fully qualified names, <code>com.mycompany.groups.SlowTest</code> and <code>com.mycompany.groups.DBTest</code>, then you could
+ create matching groups for <code>FunSuite</code>s like this:
+ </p>
+ <pre>
+ import org.scalatest.Group
+
+ object SlowTest extends Group("com.mycompany.groups.SlowTest")
+ object DBTest extends Group("com.mycompany.groups.DBTest")
+ </pre>
+ <p>
+ Given these definitions, you could place <code>PropSuite</code> tests into groups like this:
+ </p>
+ <pre>
+ import org.scalatest.prop.PropSuite
+ import org.scalacheck.Arbitrary._
+ import org.scalacheck.Prop._
+
+ class MySuite extends PropSuite {
+
+   test("list concatenation", SlowTest) {
+
+     val x = List(1, 2, 3)
+     val y = List(4, 5, 6)
+     assert(x ::: y === List(1, 2, 3, 4, 5, 6))
+
+     check((a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size)
+   }
+
+   test(
+     "list concatenation using a test method",
+     (a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size,
+     SlowTest,
+     DBTest
+   )
+ }
+ </pre>
+
+ <p>
+ This code places both tests, "list concatenation" and "list concatenation using
+ a test method," into the <code>com.mycompany.groups.SlowTest</code> group, 
+ and test "list concatenation using a test method" into the <code>com.mycompany.groups.DBTest</code> group.
+ </p>
+
+ <p>
+ The primary execute method takes two <code>Set[String]</code>s called <code>includes</code> and
+ <code>excludes</code>. If <code>includes</code> is empty, all tests will be executed
+ except those those belonging to groups listed in the
+ <code>excludes</code> <code>Set</code>. If <code>includes</code> is non-empty, only tests
+ belonging to groups mentioned in <code>includes</code>, and not mentioned in <code>excludes</code>,
+ will be executed.
+ </p>
+
+ <p>
+ <strong>Ignored tests</strong>
+ </p>
+
+ <p>
+ To support the common use case of &#8220;temporarily&#8221; disabling tests, with the
+ good intention of resurrecting the test at a later time, <code>PropSuite</code> provides registration
+ methods that start with <code>ignore</code> instead of <code>test</code>. For example, to temporarily
+ disable the tests defined in the <code>MySuite</code> example shown previously, just change &#8220;<code>test</code>&#8221; into &#8220;<code>ignore</code>,&#8221; like this:
+ </p>
+
+ <pre>
+ import org.scalatest.prop.PropSuite
+ import org.scalacheck.Arbitrary._
+ import org.scalacheck.Prop._
+
+ class MySuite extends PropSuite {
+
+   ignore("list concatenation") {
+
+     val x = List(1, 2, 3)
+     val y = List(4, 5, 6)
+     assert(x ::: y === List(1, 2, 3, 4, 5, 6))
+
+     check((a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size)
+   }
+
+   ignore(
+     "list concatenation using a test method",
+     (a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size
+   )
+ }
+ </pre>
+
+ <p>
+ If you run this version of <code>MySuite</code> with:
+ </p>
+
+ <pre>
+ scala> (new MySuite).execute()
+ </pre>
+
+ <p>
+ It will run neither test and report that both were ignored:
+ </p>
+
+ <pre>
+ Test Ignored - MySuite: list concatenation
+ Test Ignored - MySuite: list concatenation using a test method
+ </pre>
+
+ <p>
+ As with <code>org.scalatest.Suite</code>, the ignore feature is implemented as a group. The <code>execute</code> method that takes no parameters
+ adds <code>org.scalatest.Ignore</code> to the <code>excludes</code> <code>Set</code> it passes to
+ the primary <code>execute</code> method, as does <code>Runner</code>. The only difference between
+ <code>org.scalatest.Ignore</code> and the groups you may define and exclude is that ScalaTest reports
+ ignored tests to the <code>Reporter</code>. The reason ScalaTest reports ignored tests is as a feeble
+ attempt to encourage ignored tests to be eventually fixed and added back into the active suite of tests.
+ </p>
+
+ <p>
+ This trait depends on ScalaCheck, so you must include ScalaCheck's
+ jar file on either the classpath or runpath.
+ </p></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Author</b></dt><dd>Bill Venners</dd></dl>
+    
+      
+
+
+<table summary="" cellpadding="3" class="member">
+      <tr><td class="title" colspan="2">Method Summary</td></tr>
+      <tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 2-arg function into a property and checks
+   it.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>A5</em>, <em>A6</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>a5</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>s5</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>a6</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>], <code>implicit </code><em>s6</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 6-arg function into a property and checks
+   it.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        [<em>A1</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 1-arg function into a property and checks
+   it.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 3-arg function into a property and checks
+   it.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 4-arg function into a property and checks
+   it.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2Corg.scalacheck.Prop%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>p</em> : <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and
+   function value that tests the specified property.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>A5</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>a5</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>s5</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 5-arg function into a property and checks
+   it.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2Corg.scalacheck.Prop%2Corg.scalacheck.Test.Params%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>p</em> : <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <em>prms</em> : <a href="" target="contentFrame" class="org/scalacheck/Test/Params">org.scalacheck.Test.Params</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and
+   function value that tests the specified property with the specified testing parameters.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2Corg.scalacheck.Prop%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>p</em> : <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a property as a test.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Convert the passed 2-arg function into a property, and register it as a test.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2Corg.scalacheck.Prop%2Corg.scalacheck.Test.Params%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>p</em> : <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <em>prms</em> : <a href="" target="contentFrame" class="org/scalacheck/Test/Params">org.scalacheck.Test.Params</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register as a test a property with the given testing parameters.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        [<em>A1</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Convert the passed 1-arg function into a property, and register it as a test.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Convert the passed 3-arg function into a property, and register it as a test.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Convert the passed 4-arg function into a property, and register it as a test.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>A5</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>a5</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>s5</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Convert the passed 5-arg function into a property, and register it as a test.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        [<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>A5</em>, <em>A6</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>a5</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>s5</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>a6</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>], <code>implicit </code><em>s6</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Convert the passed 6-arg function into a property, and register it as a test.</div>
+      </td>
+    </tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="../../../org/scalatest/prop/Checkers.html" target="_self">Checkers</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="../../../org/scalatest/prop/Checkers.html#check%28%28A1%29%3D%3EP%29" target="_self">check</a>, <a href="../../../org/scalatest/prop/Checkers.html#check%28%28A1%2CA2%29%3D%3EP%29" target="_self">check</a>, <a href="../../../org/scalatest/prop/Checkers.html#check%28%28A1%2CA2%2CA3%29%3D%3EP%29" target="_self">check</a>, <a href="../../../org/scalatest/prop/Checkers.html#check%28%28A1%2CA2%2CA3%2CA4%29%3D%3EP%29" target="_self">check</a>, <a href="../../../org/scalatest/prop/Checkers.html#check%28%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%29" target="_self">check</a>, <a href="../../../org/scalatest/prop/Checkers.html#check%28%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%29" target="_self">check</a>, <a href="../../../org/scalatest/prop/Checkers.html#check%28org.scalacheck.Prop%2Corg.scalacheck.Test.Params%29" target="_self">check</a>, <a href="../../../org/scalatest/prop/Checkers.html#check%28org.scalacheck.Prop%29" target="_self">check</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="../../../org/scalatest/FunSuite.html" target="_self">FunSuite</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="../../../org/scalatest/FunSuite.html#info" target="_self">info</a>, <a href="../../../org/scalatest/FunSuite.html#test%28String%2Corg.scalatest.Group*%29" target="_self">test</a>, <a href="../../../org/scalatest/FunSuite.html#ignore%28String%2Corg.scalatest.Group*%29" target="_self">ignore</a>, <a href="../../../org/scalatest/FunSuite.html#testNames" target="_self">testNames</a>, <a href="../../../org/scalatest/FunSuite.html#runTest%28String%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CMap%5BString%2CAny%5D%29" target="_self">runTest</a>, <a href="../../../org/scalatest/FunSuite.html#groups" target="_self">groups</a>, <a href="../../../org/scalatest/FunSuite.html#runTests%28Option%5BString%5D%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%29" target="_self">runTests</a>, <a href="../../../org/scalatest/FunSuite.html#execute%28Option%5BString%5D%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%2COption%5Borg.scalatest.Distributor%5D%29" target="_self">execute</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="../../../org/scalatest/Suite.html" target="_self">Suite</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="../../../org/scalatest/Suite.html#nestedSuites" target="_self">nestedSuites</a>, <a href="../../../org/scalatest/Suite.html#execute%28%29" target="_self">execute</a>, <a href="../../../org/scalatest/Suite.html#execute%28String%29" target="_self">execute</a>, <a href="../../../org/scalatest/Suite.html#runNestedSuites%28org.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%2COption%5Borg.scalatest.Distributor%5D%29" target="_self">runNestedSuites</a>, <a href="../../../org/scalatest/Suite.html#suiteName" target="_self">suiteName</a>, <a href="../../../org/scalatest/Suite.html#expectedTestCount%28Set%5BString%5D%2CSet%5BString%5D%29" target="_self">expectedTestCount</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="../../../org/scalatest/Assertions.html" target="_self">Assertions</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="../../../org/scalatest/Assertions.html#assert%28Boolean%29" target="_self">assert</a>, <a href="../../../org/scalatest/Assertions.html#assert%28Boolean%2CAny%29" target="_self">assert</a>, <a href="../../../org/scalatest/Assertions.html#assert%28Option%5BString%5D%2CAny%29" target="_self">assert</a>, <a href="../../../org/scalatest/Assertions.html#assert%28Option%5BString%5D%29" target="_self">assert</a>, <a href="../../../org/scalatest/Assertions.html#convertToEqualizer%28Any%29" target="_self">convertToEqualizer</a>, <a href="../../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%2CAny%29" target="_self">intercept</a>, <a href="../../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%29" target="_self">intercept</a>, <a href="../../../org/scalatest/Assertions.html#intercept%28%3D%3EAny%29" target="_self">intercept</a>, <a href="../../../org/scalatest/Assertions.html#expect%28Any%2CAny%29" target="_self">expect</a>, <a href="../../../org/scalatest/Assertions.html#expect%28Any%29" target="_self">expect</a>, <a href="../../../org/scalatest/Assertions.html#fail%28%29" target="_self">fail</a>, <a href="../../../org/scalatest/Assertions.html#fail%28String%29" target="_self">fail</a>, <a href="../../../org/scalatest/Assertions.html#fail%28String%2CThrowable%29" target="_self">fail</a>, <a href="../../../org/scalatest/Assertions.html#fail%28Throwable%29" target="_self">fail</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#getClass%28%29" target="_self">getClass</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#hashCode%28%29" target="_self">hashCode</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#equals%28Any%29" target="_self">equals</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#clone%28%29" target="_self">clone</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#toString%28%29" target="_self">toString</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#notify%28%29" target="_self">notify</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#notifyAll%28%29" target="_self">notifyAll</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28Long%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28Long%2CInt%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#finalize%28%29" target="_self">finalize</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#%3D%3D%28AnyRef%29" target="_self">==</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#%21%3D%28AnyRef%29" target="_self">!=</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#eq%28AnyRef%29" target="_self">eq</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#ne%28AnyRef%29" target="_self">ne</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#synchronized%28T0%29" target="_self">synchronized</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#%3D%3D%28Any%29" target="_self">==</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#%21%3D%28Any%29" target="_self">!=</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#isInstanceOf" target="_self">isInstanceOf</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#asInstanceOf" target="_self">asInstanceOf</a>
+        </td></tr>
+      </table>
+
+
+      
+
+
+<table summary="" cellpadding="3" class="member-detail">
+          <tr><td class="title">Method Details</td></tr>
+        </table><div><a name="test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>test</em>[<em>A1</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Convert the passed 1-arg function into a property, and register it as a test.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>test</em>[<em>A1</em>, <em>A2</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Convert the passed 2-arg function into a property, and register it as a test.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>test</em>[<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Convert the passed 3-arg function into a property, and register it as a test.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>test</em>[<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Convert the passed 4-arg function into a property, and register it as a test.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>test</em>[<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>A5</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>a5</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>s5</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Convert the passed 5-arg function into a property, and register it as a test.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>test</em>[<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>A5</em>, <em>A6</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>, <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>a5</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>s5</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>a6</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>], <code>implicit </code><em>s6</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#test%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Convert the passed 6-arg function into a property, and register it as a test.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="test%28String%2Corg.scalacheck.Prop%2Corg.scalacheck.Test.Params%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>test</em>(<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>p</em> : <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <em>prms</em> : <a href="" target="contentFrame" class="org/scalacheck/Test/Params">org.scalacheck.Test.Params</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register as a test a property with the given testing parameters.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>p - </code>the property to check</dd><dd><code>prms - </code>the test parameters</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="test%28String%2Corg.scalacheck.Prop%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>test</em>(<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>p</em> : <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a property as a test.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>p - </code>the property to check</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>ignore</em>[<em>A1</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 1-arg function into a property and checks
+   it.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>ignore</em>[<em>A1</em>, <em>A2</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 2-arg function into a property and checks
+   it.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>ignore</em>[<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 3-arg function into a property and checks
+   it.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>ignore</em>[<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 4-arg function into a property and checks
+   it.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>ignore</em>[<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>A5</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>a5</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>s5</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 5-arg function into a property and checks
+   it.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>ignore</em>[<em>A1</em>, <em>A2</em>, <em>A3</em>, <em>A4</em>, <em>A5</em>, <em>A6</em>, <em>P</em>](<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>f</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>, <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>) =&gt; <a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*)(<code>implicit </code><em>p</em> : (<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#P" target="_self">P</a>) =&gt; <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <code>implicit </code><em>a1</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>s1</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A1" target="_self">A1</a>], <code>implicit </code><em>a2</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>s2</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A2" target="_self">A2</a>], <code>implicit </code><em>a3</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>s3</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A3" target="_self">A3</a>], <code>implicit </code><em>a4</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>s4</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A4" target="_self">A4</a>], <code>implicit </code><em>a5</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>s5</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A5" target="_self">A5</a>], <code>implicit </code><em>a6</em> : <a href="" target="contentFrame" class="org/scalacheck/Arbitrary">org.scalacheck.Arbitrary</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>], <code>implicit </code><em>s6</em> : <a href="" target="contentFrame" class="org/scalacheck/Shrink">org.scalacheck.Shrink</a>[<a href="../../../org/scalatest/prop/PropSuite.html#ignore%28String%2C%28A1%2CA2%2CA3%2CA4%2CA5%2CA6%29%3D%3EP%2Corg.scalatest.Group*%29#A6" target="_self">A6</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and
+   function value that converts the passed 6-arg function into a property and checks
+   it.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>f - </code>the function to be converted into a property and checked</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2Corg.scalacheck.Prop%2Corg.scalacheck.Test.Params%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>ignore</em>(<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>p</em> : <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <em>prms</em> : <a href="" target="contentFrame" class="org/scalacheck/Test/Params">org.scalacheck.Test.Params</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and
+   function value that tests the specified property with the specified testing parameters.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>p - </code>the property to check</dd><dd><code>prms - </code>the test parameters</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2Corg.scalacheck.Prop%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>ignore</em>(<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>p</em> : <a href="" target="contentFrame" class="org/scalacheck/Prop">org.scalacheck.Prop</a>, <em>testGroups</em> : <a href="../../../org/scalatest/Group.html" target="_self">Group</a>*) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and
+   function value that tests the specified property.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>p - </code>the property to check</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>AssertionError - </code>if a test case is discovered for which the property doesn't hold.</dd></dl>
+    <hr></hr></div>
+
+
+    <hr></hr>
+        <div>Copyright (C) 2001-2009 Artima, Inc. All rights reserved.</div><table summary="" class="navigation">
+        <tr>
+          <td class="navigation-links" valign="top">
+            <!-- <table><tr></tr></table> -->
+          </td>
+          <td align="right" valign="top" style="white-space:nowrap;" rowspan="2">
+            <div class="doctitle-larger">ScalaTest 0.9.5</div>
+          </td>
+        </tr>
+        <tr><td></td></tr>
+      </table>
+      </body>
+      </html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+        <head><title>class SpecReport in org.scalatest</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF8"></meta><meta content="scaladoc (version 2.7.3.final)" name="generator"></meta><link href="../../style.css" type="text/css" rel="stylesheet"></link><script type="text/javascript" src="../../script.js"></script>
+        </head>
+        <body onload="init()">
+        <table summary="" class="navigation">
+        <tr>
+          <td class="navigation-links" valign="top">
+            <!-- <table><tr></tr></table> -->
+          </td>
+          <td align="right" valign="top" style="white-space:nowrap;" rowspan="2">
+            <div class="doctitle-larger">ScalaTest 0.9.5</div>
+          </td>
+        </tr>
+        <tr><td></td></tr>
+      </table>
+        
+      <div class="entity">
+        <a href="../../org/scalatest$package.html" target="_self">org.scalatest</a>
+        <br></br>
+        <span class="entity">class  SpecReport</span>
+      </div><hr></hr>
+      <div class="source">
+        [source: <a href="" class="org/scalatest/SpecReport"><code>org/scalatest/SpecReport.scala</code></a>]
+      </div><hr></hr>
+      <a name="SpecReport"></a><dl>
+      <dt>
+        @<a href="" target="contentFrame" class="scala/serializable">scala.serializable</a><br></br>
+        <code></code>
+        <code>class</code>
+        <em>SpecReport</em>(<code>val override </code><em>name</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val override </code><em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>plainSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>formattedSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val </code><em>includeInSpecOutput</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>, <code>val override </code><em>throwable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>], <code>val override </code><em>rerunnable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="../../org/scalatest/Rerunnable.html" target="_self">Rerunnable</a>], <code>val override </code><em>threadName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <code>val override </code><em>date</em> : <a href="" target="contentFrame" class="java/util/Date">java.util.Date</a>)
+      </dt>
+      <dd><code> extends </code><a href="../../org/scalatest/Report.html" target="_self">Report</a></dd>
+    </dl>
+      <dl><dd><p>
+ Class used to send specification-style reports to a <code>Reporter</code>.
+ </p>
+
+ <p>
+ The primary constructor instantiates a new <code>Report</code> with specified name,
+ message, specification text, formatted specification text, flag indicating whether to include the report in 
+ a specification-style output, optional throwable, optional rerunnable, thread name, and date. This class can be subclassed to send more information
+ to a reporter.
+ </p>
+
+ <p>
+ The difference between <code>message</code>, <code>plainSpecText</code>, and <code>formattedSpecText</code> is that <code>message</code> is
+ formatted as a "normal" test report, <code>plainSpecText</code> is formatted for specification-style output, and
+ <code>formattedSpecText</code> is formatted for specification-style output
+ to the console. For example, if the <code>message</code> looks like this:
+ </p>
+
+ <p>
+ <code>StackSpec - A Stack (with one item less than capacity) should not be full</code>
+ </p>
+
+ <p>
+ The <code>plainSpecText</code> might look like:
+ </p>
+
+ <p>
+ <code>A Stack (with one item less than capacity) should not be full</code>
+ </p>
+
+ <p>
+ And the <code>formattedSpecText</code> might look like:
+ </p>
+
+ <p>
+ <code>- A Stack (with one item less than capacity) should not be full</code>
+ </p>
+
+ <p>
+ The <code>includeInSpecOutput</code> <code>Boolean</code> flag is used to omit reports that
+ would detract from the readability of the specification-style output. For example, trait <code>Spec</code>
+ sets <code>includeInSpecOutput</code> to <code>false</code> for <code>testStarting</code> reports, but to
+ <code>true</code> for <code>testSucceeded</code> and <code>testFailed</code> reports. This produces reports
+ that read more like specifications, for example:
+ </p>
+
+ <pre>
+ A Stack (when not empty)
+ - should allow me to pop
+ - should be invoked
+ A Stack (when not full)
+ - should allow me to push
+ </pre>
+
+ <p>
+ <strong>Extensibility</strong>
+ </p>
+
+ <p>
+ <code>SpecReport</code>, like its superclass <code>Report</code>, can be subclassed so that custom information can
+ be passed to the subclass's constructor.
+ This information can be passed in when the <code>SpecReport</code> subclass is instantiated, from within
+ test methods, overridden <code>Suite</code> methods, or other code. Instances of <code>SpecReport</code> subclasses
+ can be passed to any <code>Reporter</code>, but any custom information they contain will not be presented to the
+ user except by <code>Reporter</code>s written with knowledge of the <code>SpecReport</code> subclass and its custom
+ information. Thus, when you define a <code>SpecReport</code> subclass that embeds custom information, you would typically
+ also define one or more <code>Reporter</code> classes that present the custom information to the user.
+ </p></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>name - </code>the name of the entity about which this report was generated.</dd><dd><code>message - </code>a <code>String</code> message.</dd><dd><code>plainSpecText - </code>the plain specification text <code>String</code>, with no formatting.</dd><dd><code>formattedSpecText - </code>the specification text <code>String</code> formatted for printing to the console.</dd><dd><code>includeInSpecOutput - </code>a <code>Boolean</code> flag that indicates whether this <code>SpecReport</code> should be   included in a specification-style output.</dd><dd><code>throwable - </code>the <code>Throwable</code> that indicated the problem, or a <code>Throwable</code> created     to capture stack trace information about the problem, or <code>None</code>. If <code>None</code> is passed, the problem
+     is reported without describing a <code>Throwable</code>.</dd><dd><code>rerunnable - </code>a <code>Rerunnable</code> that can be used to rerun a test or other entity (such as a suite),     or <code>None</code>. If <code>None</code> is passed, the test or other entity can not be rerun.</dd><dd><code>threadName - </code>a name for the <code>Thread</code> about whose activity this report was generated.</dd><dd><code>date - </code>a relevant <code>Date</code>. For example, the a <code>Date</code>     indicating the time this <code>Report</code> was generated, or a <code>Date</code>
+      indicating the time the event reported by this <code>Report</code> occurred.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if any of the specified     <code>name</code>, <code>message</code>, <code>plainSpecText</code>, <code>formattedSpecText</code>, <code>throwable</code>,
+     <code>rerunnable</code>, <code>threadName</code>, or <code>date</code> references are <code>null</code>.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Author</b></dt><dd>Bill Venners</dd></dl>
+    
+      <table summary="" cellpadding="3" class="member">
+      <tr><td class="title" colspan="2">Additional Constructor Summary</td></tr>
+      <tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/SpecReport.html#this%28String%2CString%2CString%2CString%2CBoolean%29" target="_self">this</a></em>
+        (<em>name</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>plainSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>formattedSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>includeInSpecOutput</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>) : <a href="../../org/scalatest/SpecReport.html" target="_self">SpecReport</a>
+        
+        <div>Constructs a new <code>Report</code> with specified name
+   and message.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code> def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/SpecReport.html#this%28String%2CString%2CString%2CString%2CBoolean%2COption%5BThrowable%5D%2COption%5Borg.scalatest.Rerunnable%5D%29" target="_self">this</a></em>
+        (<em>name</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>plainSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>formattedSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>includeInSpecOutput</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>, <em>throwable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>], <em>rerunnable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="../../org/scalatest/Rerunnable.html" target="_self">Rerunnable</a>]) : <a href="../../org/scalatest/SpecReport.html" target="_self">SpecReport</a>
+        
+        <div>Constructs a new <code>Report</code> with specified name,
+   message, optional throwable, and optional rerunnable.</div>
+      </td>
+    </tr>
+      </table>
+
+
+<table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#getClass%28%29" target="_self">getClass</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#hashCode%28%29" target="_self">hashCode</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#equals%28Any%29" target="_self">equals</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#clone%28%29" target="_self">clone</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#toString%28%29" target="_self">toString</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#notify%28%29" target="_self">notify</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#notifyAll%28%29" target="_self">notifyAll</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28Long%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28Long%2CInt%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#finalize%28%29" target="_self">finalize</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#%3D%3D%28AnyRef%29" target="_self">==</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#%21%3D%28AnyRef%29" target="_self">!=</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#eq%28AnyRef%29" target="_self">eq</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#ne%28AnyRef%29" target="_self">ne</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#synchronized%28T0%29" target="_self">synchronized</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#%3D%3D%28Any%29" target="_self">==</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#%21%3D%28Any%29" target="_self">!=</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#isInstanceOf" target="_self">isInstanceOf</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#asInstanceOf" target="_self">asInstanceOf</a>
+        </td></tr>
+      </table>
+
+
+      <table summary="" cellpadding="3" class="member-detail">
+          <tr><td class="title">Additional Constructor Details</td></tr>
+        </table><div><a name="this%28String%2CString%2CString%2CString%2CBoolean%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>this</em>(<em>name</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>plainSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>formattedSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>includeInSpecOutput</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>) : <a href="../../org/scalatest/SpecReport.html" target="_self">SpecReport</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Constructs a new <code>Report</code> with specified name
+   and message.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>name - </code>the name of the entity about which this report was generated.</dd><dd><code>message - </code>a <code>String</code> message.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if any of the specified <code>name</code>,       <code>message</code>, <code>plainSpecText</code>, or <code>formattedSpecText</code> parameters are <code>null</code>.</dd></dl>
+    <hr></hr>
+<a name="this%28String%2CString%2CString%2CString%2CBoolean%2COption%5BThrowable%5D%2COption%5Borg.scalatest.Rerunnable%5D%29"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>def</code>
+        <em>this</em>(<em>name</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>message</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>plainSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>formattedSpecText</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>includeInSpecOutput</em> : <a href="http://www.scala-lang.org/docu/files/api/scala/Boolean.html" target="_self">Boolean</a>, <em>throwable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/Throwable">java.lang.Throwable</a>], <em>rerunnable</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="../../org/scalatest/Rerunnable.html" target="_self">Rerunnable</a>]) : <a href="../../org/scalatest/SpecReport.html" target="_self">SpecReport</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Constructs a new <code>Report</code> with specified name,
+   message, optional throwable, and optional rerunnable.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>name - </code>the name of the entity about which this report was generated.</dd><dd><code>message - </code>a <code>String</code> message.</dd><dd><code>throwable - </code>a relevant <code>Throwable</code>, or <code>None</code>. For example, this       <code>Throwable</code> may have indicated a problem being reported by this
+       <code>Report</code>, or it may have been created to provide stack trace
+       information in the <code>Report</code>.</dd><dd><code>rerunnable - </code>a <code>Rerunnable</code> that can be used to rerun a test or other entity, or <code>None</code>.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if any of the specified        <code>name</code>, <code>message</code>, , <code>plainSpecText</code>, <code>formattedSpecText</code>, <code>throwable</code>,
+       or <code>rerunnable</code> parameters are <code>null</code>.</dd></dl>
+    <hr></hr></div>
+
+
+
+
+
+    <hr></hr>
+        <div>Copyright (C) 2001-2009 Artima, Inc. All rights reserved.</div><table summary="" class="navigation">
+        <tr>
+          <td class="navigation-links" valign="top">
+            <!-- <table><tr></tr></table> -->
+          </td>
+          <td align="right" valign="top" style="white-space:nowrap;" rowspan="2">
+            <div class="doctitle-larger">ScalaTest 0.9.5</div>
+          </td>
+        </tr>
+        <tr><td></td></tr>
+      </table>
+      </body>
+      </html>

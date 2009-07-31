@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+        <head><title>All classes and objects in org.scalatest.junit</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF8"></meta><meta content="scaladoc (version 2.7.3.final)" name="generator"></meta><link href="../../style.css" type="text/css" rel="stylesheet"></link><script type="text/javascript" src="../../script.js"></script>
+        </head>
+        <body onload="init()"><div class="page-title"><div>ScalaTest 0.9.5</div></div><p><div>This document is the API specification for ScalaTest 0.9.5</div></p><table summary="" cellpadding="3" class="member">
+        <tr><td class="title" colspan="2">Class Summary</td></tr>
+        <tr>
+      <td class="modifiers" valign="top"> 
+        <code> trait</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/junit/JUnit3Suite.html" target="_self">JUnit3Suite</a></em>
+        <code> extends </code><a href="" target="contentFrame" class="junit/framework/TestCase">junit.framework.TestCase</a><code> with </code><a href="../../org/scalatest/Suite.html" target="_self">Suite</a>
+        
+        <div>A suite of tests that can be run with either JUnit 3 or ScalaTest. This trait allows you to write JUnit 3 tests
+ with ScalaTest's more concise assertion syntax as well as JUnit's assertions (<code>assertEquals</code>, etc.).
+ You create tests by defining methods that start with <code>test</code>, and can create fixtures with methods
+ named <code>setUp</code> and <code>tearDown</code>. For example:
+
+ <pre>
+ import org.scalatest.junit.JUnit3Suite
+ import scala.collection.mutable.ListBuffer
+
+ class TwoSuite extends JUnit3Suite {
+
+   var sb: StringBuilder = _
+   var lb: ListBuffer[String] = _
+
+   override def setUp() {
+     sb = new StringBuilder("ScalaTest is ")
+     lb = new ListBuffer[String]
+   }
+
+   def testEasy() {
+     sb.append("easy!")
+     assert(sb.toString === "ScalaTest is easy!")
+     assert(lb.isEmpty)
+     lb += "sweet"
+   }
+
+   def testFun() {
+     sb.append("fun!")
+     assert(sb.toString === "ScalaTest is fun!")
+     assert(lb.isEmpty)
+   }
+ }
+ </pre></div>
+      </td>
+    </tr>        
+        </table>
+</body>
+      </html>

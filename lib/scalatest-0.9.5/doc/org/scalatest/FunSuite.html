@@ -1,0 +1,877 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+        <head><title>trait FunSuite in org.scalatest</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF8"></meta><meta content="scaladoc (version 2.7.3.final)" name="generator"></meta><link href="../../style.css" type="text/css" rel="stylesheet"></link><script type="text/javascript" src="../../script.js"></script>
+        </head>
+        <body onload="init()">
+        <table summary="" class="navigation">
+        <tr>
+          <td class="navigation-links" valign="top">
+            <!-- <table><tr></tr></table> -->
+          </td>
+          <td align="right" valign="top" style="white-space:nowrap;" rowspan="2">
+            <div class="doctitle-larger">ScalaTest 0.9.5</div>
+          </td>
+        </tr>
+        <tr><td></td></tr>
+      </table>
+        
+      <div class="entity">
+        <a href="../../org/scalatest$package.html" target="_self">org.scalatest</a>
+        <br></br>
+        <span class="entity">trait  FunSuite</span>
+      </div><hr></hr>
+      <div class="source">
+        [source: <a href="" class="org/scalatest/FunSuite"><code>org/scalatest/FunSuite.scala</code></a>]
+      </div><hr></hr>
+      <a name="FunSuite"></a><dl>
+      <dt>
+        
+        <code></code>
+        <code>trait</code>
+        <em>FunSuite</em>
+      </dt>
+      <dd><code> extends </code><a href="../../org/scalatest/Suite.html" target="_self">Suite</a></dd>
+    </dl>
+      <dl><dd>A suite of tests in which each test is represented as a function value. The &#8220;<code>Fun</code>&#8221; in <code>FunSuite</code> stands for functional.
+ Here's an example <code>FunSuite</code>:
+
+ <pre>
+ import org.scalatest.FunSuite
+
+ class MySuite extends FunSuite {
+
+   test("addition") {
+     val sum = 1 + 1
+     assert(sum === 2)
+     assert(sum + 2 === 4)
+   }
+
+   test("subtraction") {
+     val diff = 4 - 1
+     assert(diff === 3)
+     assert(diff - 2 === 1)
+   }
+ }
+ </pre>
+
+ <p>
+ &#8220;<code>test</code>&#8221; is a method, defined in <code>FunSuite</code>, which will be invoked
+ by the primary constructor of <code>MySuite</code>. You specify the name of the test as
+ a string between the parentheses, and the test code itself between curly braces.
+ The test code is a function passed as a by-name parameter to <code>test</code>, which registers
+ it for later execution. One benefit of <code>FunSuite</code> compared to <code>Suite</code> is you need not name all your
+ tests starting with &#8220;<code>test</code>.&#8221; In addition, you can more easily give long names to
+ your tests, because you need not encode them in camel case, as you must do
+ with test methods.
+ </p>
+ 
+ <p>
+ <strong>Test fixtures</strong>
+ </p>
+
+ <p>
+ A test <em>fixture</em> is objects or other artifacts (such as files, sockets, database
+ connections, etc.) used by tests to do their work. You can use fixtures in
+ <code>FunSuite</code>s with the same approaches suggested for <code>Suite</code> in
+ its documentation. The same text that appears in the test fixture
+ section of <code>Suite</code>'s documentation is repeated here, with examples changed from
+ <code>Suite</code> to <code>FunSuite</code>.
+ </p>
+
+ <p>
+ If a fixture is used by only one test, then the definitions of the fixture objects should
+ be local to the test function, such as the objects assigned to <code>sum</code> and <code>diff</code> in the
+ previous <code>MySuite</code> examples. If multiple tests need to share a fixture, the best approach
+ is to assign them to instance variables. Here's a (very contrived) example, in which the object assigned
+ to <code>shared</code> is used by multiple test functions:
+ </p>
+
+ <pre>
+ import org.scalatest.FunSuite
+
+ class MySuite extends FunSuite {
+
+   // Sharing fixture objects via instance variables
+   val shared = 5
+
+   test("Addition") {
+     val sum = 2 + 3
+     assert(sum === shared)
+   }
+
+   test("Subtraction") {
+     val diff = 7 - 2
+     assert(diff === shared)
+   }
+ }
+ </pre>
+
+ <p>
+ In some cases, however, shared <em>mutable</em> fixture objects may be changed by test methods such that
+ it needs to be recreated or reinitialized before each test. Shared resources such
+ as files or database connections may also need to 
+ be cleaned up after each test. JUnit offers methods <code>setup</code> and
+ <code>tearDown</code> for this purpose. In ScalaTest, you can use the <code>BeforeAndAfter</code> trait,
+ which will be described later, to implement an approach similar to JUnit's <code>setup</code>
+ and <code>tearDown</code>, however, this approach often involves reassigning <code>var</code>s
+ between tests. Before going that route, you should consider two approaches that
+ avoid <code>var</code>s. One approach is to write one or more "create" methods
+ that return a new instance of a needed object (or a tuple of new instances of
+ multiple objects) each time it is called. You can then call a create method at the beginning of each
+ test that needs the fixture, storing the fixture object or objects in local variables. Here's an example:
+ </p>
+
+ <pre>
+ import org.scalatest.FunSuite
+ import scala.collection.mutable.ListBuffer
+
+ class MySuite extends FunSuite {
+
+   // create objects needed by tests and return as a tuple
+   def createFixture = (
+     new StringBuilder("ScalaTest is "),
+     new ListBuffer[String]
+   )
+
+   test("Easy") {
+     val (builder, lbuf) = createFixture
+     builder.append("easy!")
+     assert(builder.toString === "ScalaTest is easy!")
+     assert(lbuf.isEmpty)
+     lbuf += "sweet"
+   }
+
+   test("Fun") {
+     val (builder, lbuf) = createFixture
+     builder.append("fun!")
+     assert(builder.toString === "ScalaTest is fun!")
+     assert(lbuf.isEmpty)
+   }
+ }
+ </pre>
+
+ <p>
+ Another approach to mutable fixture objects that avoids <code>var</code>s is to create "with" methods,
+ which take test code as a function that takes the fixture objects as parameters, and wrap test code in calls to the "with" method. Here's an example:
+ </p>
+ <pre>
+ import org.scalatest.FunSuite
+ import scala.collection.mutable.ListBuffer
+
+ class MySuite extends FunSuite {
+
+   def withFixture(testFunction: (StringBuilder, ListBuffer[String]) => Unit) {
+
+     // Create needed mutable objects
+     val sb = new StringBuilder("ScalaTest is ")
+     val lb = new ListBuffer[String]
+
+     // Invoke the test function, passing in the mutable objects
+     testFunction(sb, lb)
+   }
+
+   test("Easy") {
+     withFixture {
+       (builder, lbuf) => {
+         builder.append("easy!")
+         assert(builder.toString === "ScalaTest is easy!")
+         assert(lbuf.isEmpty)
+         lbuf += "sweet"
+       }
+     }
+   }
+
+   test("Fun") {
+     withFixture {
+       (builder, lbuf) => {
+         builder.append("fun!")
+         assert(builder.toString === "ScalaTest is fun!")
+         assert(lbuf.isEmpty)
+       }
+     }
+   }
+ }
+ </pre>
+ 
+ One advantage of this approach compared to the create method approach shown previously is that
+ you can more easily perform cleanup after each test executes. For example, you
+ could create a temporary file before each test, and delete it afterwords, by
+ doing so before and after invoking the test function in a <code>withTempFile</code>
+ method. Here's an example:
+
+ <pre>
+ import org.scalatest.FunSuite
+ import java.io.FileReader
+ import java.io.FileWriter
+ import java.io.File
+ 
+ class MySuite extends FunSuite {
+ 
+   def withTempFile(testFunction: FileReader => Unit) {
+ 
+     val FileName = "TempFile.txt"
+  
+     // Set up the temp file needed by the test
+     val writer = new FileWriter(FileName)
+     try {
+       writer.write("Hello, test!")
+     }
+     finally {
+       writer.close()
+     }
+  
+     // Create the reader needed by the test
+     val reader = new FileReader(FileName)
+  
+     try {
+       // Run the test using the temp file
+       testFunction(reader)
+     }
+     finally {
+       // Close and delete the temp file
+       reader.close()
+       val file = new File(FileName)
+       file.delete()
+     }
+   }
+ 
+   test("Reading from the temp file") {
+     withTempFile {
+       (reader) => {
+         var builder = new StringBuilder
+         var c = reader.read()
+         while (c != -1) {
+           builder.append(c.toChar)
+           c = reader.read()
+         }
+         assert(builder.toString === "Hello, test!")
+       }
+     }
+   }
+ 
+   test("First char of the temp file") {
+     withTempFile {
+       (reader) => {
+         assert(reader.read() === 'H')
+       }
+     }
+   }
+ }
+ </pre>
+
+ <p>
+ If you are more comfortable with reassigning instance variables, however, you can
+ instead use the <code>BeforeAndafter</code> trait, which provides
+ methods that will be run before and after each test. <code>BeforeAndAfter</code>'s
+ <code>beforeEach</code> method will be run before, and its <code>afterEach</code>
+ method after, each test (like JUnit's <code>setup</code>  and <code>tearDown</code>
+ methods, respectively). For example, here's how you'd write the previous
+ test that uses a temp file with <code>BeforeAndAfter</code>:
+ </p>
+
+ <pre>
+ import org.scalatest.FunSuite
+ import org.scalatest.BeforeAndAfter
+ import java.io.FileReader
+ import java.io.FileWriter
+ import java.io.File
+
+ class MySuite extends FunSuite with BeforeAndAfter {
+
+   private val FileName = "TempFile.txt"
+   private var reader: FileReader = _
+
+   // Set up the temp file needed by the test
+   override def beforeEach() {
+     val writer = new FileWriter(FileName)
+     try {
+       writer.write("Hello, test!")
+     }
+     finally {
+       writer.close()
+     }
+
+     // Create the reader needed by the test
+     reader = new FileReader(FileName)
+   }
+
+   // Close and delete the temp file
+   override def afterEach() {
+     reader.close()
+     val file = new File(FileName)
+     file.delete()
+   }
+
+   test("Reading from the temp file") {
+     var builder = new StringBuilder
+     var c = reader.read()
+     while (c != -1) {
+       builder.append(c.toChar)
+       c = reader.read()
+     }
+     assert(builder.toString === "Hello, test!")
+   }
+
+   test("First char of the temp file") {
+     assert(reader.read() === 'H')
+   }
+ }
+ </pre>
+
+ <p>
+ In this example, the instance variable <code>reader</code> is a <code>var</code>, so
+ it can be reinitialized between tests by the <code>beforeEach</code> method. If you
+ want to execute code before and after all tests (and nested suites) in a suite, such
+ as you could do with <code>@BeforeClass</code> and <code>@AfterClass</code>
+ annotations in JUnit 4, you can use the <code>beforeAll</code> and <code>afterAll</code>
+ methods of <code>BeforeAndAfter</code>. See the documentation for <code>BeforeAndAfter</code> for
+ an example.
+ </p>
+
+ <p>
+ <strong>Test groups</strong>
+ </p>
+
+ <p>
+ A <code>FunSuite</code>'s tests may be classified into named <em>groups</em>.
+ As with any suite, when executing a <code>FunSuite</code>, groups of tests can
+ optionally be included and/or excluded. To place <code>FunSuite</code> tests into
+ groups, you pass objects that extend abstract class <code>org.scalatest.Group</code> to methods
+ that register tests. Class <code>Group</code> takes one parameter, a string name.  If you have
+ created Java annotation interfaces for use as group names in direct subclasses of <code>org.scalatest.Suite</code>,
+ then you will probably want to use group names on your <code>FunSuite</code>s that match. To do so, simply 
+ pass the fully qualified names of the Java interfaces to the <code>Group</code> constructor. For example, if you've
+ defined Java annotation interfaces with fully qualified names, <code>com.mycompany.groups.SlowTest</code> and <code>com.mycompany.groups.DBTest</code>, then you could
+ create matching groups for <code>FunSuite</code>s like this:
+ </p>
+ <pre>
+ import org.scalatest.Group
+
+ object SlowTest extends Group("com.mycompany.groups.SlowTest")
+ object DBTest extends Group("com.mycompany.groups.DBTest")
+ </pre>
+ <p>
+ Given these definitions, you could place <code>FunSuite</code> tests into groups like this:
+ </p>
+ <pre>
+ import org.scalatest.FunSuite
+
+ class MySuite extends FunSuite {
+
+   test("addition", SlowTest) {
+     val sum = 1 + 1
+     assert(sum === 2)
+     assert(sum + 2 === 4)
+   }
+
+   test("subtraction", SlowTest, DBTest) {
+     val diff = 4 - 1
+     assert(diff === 3)
+     assert(diff - 2 === 1)
+   }
+ }
+ </pre>
+
+ <p>
+ This code places both tests, "addition" and "subtraction," into the <code>com.mycompany.groups.SlowTest</code> group, 
+ and test "subtraction" into the <code>com.mycompany.groups.DBTest</code> group.
+ </p>
+
+ <p>
+ The primary execute method takes two <code>Set[String]</code>s called <code>groupsToInclude</code> and
+ <code>groupsToExclude</code>. If <code>groupsToInclude</code> is empty, all tests will be executed
+ except those those belonging to groups listed in the
+ <code>groupsToExclude</code> <code>Set</code>. If <code>groupsToInclude</code> is non-empty, only tests
+ belonging to groups mentioned in <code>groupsToInclude</code>, and not mentioned in <code>groupsToExclude</code>,
+ will be executed.
+ </p>
+
+ <p>
+ <strong>Ignored tests</strong>
+ </p>
+
+ <p>
+ To support the common use case of &#8220;temporarily&#8221; disabling a test, with the
+ good intention of resurrecting the test at a later time, <code>FunSuite</code> provides registration
+ methods that start with <code>ignore</code> instead of <code>test</code>. For example, to temporarily
+ disable the test named <code>addition</code>, just change &#8220;<code>test</code>&#8221; into &#8220;<code>ignore</code>,&#8221; like this:
+ </p>
+
+ <pre>
+ import org.scalatest.FunSuite
+
+ class MySuite extends FunSuite {
+
+   ignore("addition") {
+     val sum = 1 + 1
+     assert(sum === 2)
+     assert(sum + 2 === 4)
+   }
+
+   test("subtraction") {
+     val diff = 4 - 1
+     assert(diff === 3)
+     assert(diff - 2 === 1)
+   }
+ }
+ </pre>
+
+ <p>
+ If you run this version of <code>MySuite</code> with:
+ </p>
+
+ <pre>
+ scala> (new MySuite).execute()
+ </pre>
+
+ <p>
+ It will run only <code>subtraction</code> and report that <code>addition</code> was ignored:
+ </p>
+
+ <pre>
+ Test Ignored - MySuite: addition
+ Test Starting - MySuite: subtraction
+ Test Succeeded - MySuite: subtraction
+ </pre>
+
+ <p>
+ As with <code>org.scalatest.Suite</code>, the ignore feature is implemented as a group. The <code>execute</code> method that takes no parameters
+ adds <code>org.scalatest.Ignore</code> to the <code>groupsToExclude</code> <code>Set</code> it passes to
+ the primary <code>execute</code> method, as does <code>Runner</code>. The only difference between
+ <code>org.scalatest.Ignore</code> and the groups you may define and exclude is that ScalaTest reports
+ ignored tests to the <code>Reporter</code>. The reason ScalaTest reports ignored tests is as a feeble
+ attempt to encourage ignored tests to be eventually fixed and added back into the active suite of tests.
+ </p>
+
+ <p>
+ <strong>Informers</strong>
+ </p>
+
+ <p>
+ One of the parameters to the primary <code>execute</code> method is a <code>Reporter</code>, which
+ will collect and report information about the running suite of tests.
+ Information about suites and tests that were run, whether tests succeeded or failed, 
+ and tests that were ignored will be passed to the <code>Reporter</code> as the suite runs.
+ Most often the reporting done by default by <code>FunSuite</code>'s methods will be sufficient, but
+ occasionally you may wish to provide custom information to the <code>Reporter</code> from a test.
+ For this purpose, an <code>Informer</code> that will forward information to the current <code>Reporter</code>
+ is provided via the <code>info</code> parameterless method.
+ You can pass the extra information to the <code>Informer</code> via one of its <code>apply</code> methods.
+ The <code>Informer</code> will then pass the information to the <code>Reporter</code>'s <code>infoProvided</code> method.
+ Here's an example:
+ </p>
+
+ <pre>
+ import org.scalatest.FunSuite
+
+ class MySuite extends FunSuite {
+
+   test("addition") {
+     val sum = 1 + 1
+     assert(sum === 2)
+     assert(sum + 2 === 4)
+     info("Addition seems to work")
+   }
+ }
+ </pre>
+
+ If you run this <code>Suite</code> from the interpreter, you will see the following message
+ included in the printed report:
+
+ <pre>
+ Test Starting - MySuite: addition
+ Info Provided - MySuite.addition: Addition seems to work
+ Test Succeeded - MySuite: addition
+ </pre></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Author</b></dt><dd>Bill Venners</dd></dl>
+    <dl>
+      <dt style="margin:10px 0 0 20px;"><b>Direct Known Subclasses:</b></dt>
+      <dd><a href="../../org/scalatest/prop/FunSuite.html" target="_self">FunSuite</a>, <a href="../../org/scalatest/prop/PropSuite.html" target="_self">PropSuite</a></dd>
+      </dl><hr></hr>
+      
+
+
+<table summary="" cellpadding="3" class="member">
+      <tr><td class="title" colspan="2">Method Summary</td></tr>
+      <tr>
+      <td class="modifiers" valign="top"> 
+        <code>override def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/FunSuite.html#execute%28Option%5BString%5D%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%2COption%5Borg.scalatest.Distributor%5D%29" target="_self">execute</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>reporter</em> : <a href="../../org/scalatest/Reporter.html" target="_self">Reporter</a>, <em>stopper</em> : <a href="../../org/scalatest/Stopper.html" target="_self">Stopper</a>, <em>groupsToInclude</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>groupsToExclude</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>goodies</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Map">scala.collection.immutable.Map</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>], <em>distributor</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="../../org/scalatest/Distributor.html" target="_self">Distributor</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Execute this <code>Suite</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>override def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/FunSuite.html#groups" target="_self">groups</a></em>
+         : <a href="" target="contentFrame" class="scala/collection/immutable/Map">scala.collection.immutable.Map</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>]]
+        
+        <div>A <code>Map</code> whose keys are <code>String</code> group names to which tests in this <code>FunSuite</code> belong, and values
+   the <code>Set</code> of test names that belong to each group. If this <code>FunSuite</code> contains no groups, this method returns an empty <code>Map</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>protected def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/FunSuite.html#ignore%28String%2Corg.scalatest.Group*%29" target="_self">ignore</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>testGroups</em> : <a href="../../org/scalatest/Group.html" target="_self">Group</a>*)(<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test to ignore, which has the specified name, optional groups, and function value that takes no arguments.
+   This method will register the test for later ignoring via an invocation of one of the <code>execute</code>
+   methods. This method exists to make it easy to ignore an existing test method by changing the call to <code>test</code>
+   to <code>ignore</code> without deleting or commenting out the actual test code. The test will not be executed, but a
+   report will be sent that indicates the test was ignored. The passed test name must not have been registered previously on
+   this <code>FunSuite</code> instance.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>implicit def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/FunSuite.html#info" target="_self">info</a></em>
+         : <a href="../../org/scalatest/Informer.html" target="_self">Informer</a>
+        
+        <div>Returns an <code>Informer</code> that during test execution will forward strings (or reports) passed to its
+   apply method to the current reporter. If invoked inside a test function, it will forward the information to
+   the current reporter immediately. If invoked outside a test function, but in the primary constructor, it
+   will register the info for forwarding later during test execution. If invoked at any other time, it will
+   throw an exception.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>protected override def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/FunSuite.html#runTest%28String%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CMap%5BString%2CAny%5D%29" target="_self">runTest</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>reporter</em> : <a href="../../org/scalatest/Reporter.html" target="_self">Reporter</a>, <em>stopper</em> : <a href="../../org/scalatest/Stopper.html" target="_self">Stopper</a>, <em>goodies</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Map">scala.collection.immutable.Map</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Run a test. This trait's implementation runs the test registered with the name specified by <code>testName</code>.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>protected override def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/FunSuite.html#runTests%28Option%5BString%5D%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%29" target="_self">runTests</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>reporter</em> : <a href="../../org/scalatest/Reporter.html" target="_self">Reporter</a>, <em>stopper</em> : <a href="../../org/scalatest/Stopper.html" target="_self">Stopper</a>, <em>groupsToInclude</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>groupsToExclude</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>goodies</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Map">scala.collection.immutable.Map</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div></div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>protected def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/FunSuite.html#test%28String%2Corg.scalatest.Group*%29" target="_self">test</a></em>
+        (<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>testGroups</em> : <a href="../../org/scalatest/Group.html" target="_self">Group</a>*)(<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+        
+        <div>Register a test with the specified name, optional groups, and function value that takes no arguments.
+     This method will register the test for later execution via an invocation of one of the <code>execute</code>
+     methods. The passed test name must not have been registered previously on
+     this <code>FunSuite</code> instance.</div>
+      </td>
+    </tr>
+<tr>
+      <td class="modifiers" valign="top"> 
+        <code>override def</code>
+      </td>
+      <td class="signature">
+        <em><a href="../../org/scalatest/FunSuite.html#testNames" target="_self">testNames</a></em>
+         : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>]
+        
+        <div>An immutable <code>Set</code> of test names. If this <code>FunSuite</code> contains no tests, this method returns an empty <code>Set</code>.</div>
+      </td>
+    </tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="../../org/scalatest/Suite.html" target="_self">Suite</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="../../org/scalatest/Suite.html#nestedSuites" target="_self">nestedSuites</a>, <a href="../../org/scalatest/Suite.html#execute%28%29" target="_self">execute</a>, <a href="../../org/scalatest/Suite.html#execute%28String%29" target="_self">execute</a>, <a href="../../org/scalatest/Suite.html#runNestedSuites%28org.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%2COption%5Borg.scalatest.Distributor%5D%29" target="_self">runNestedSuites</a>, <a href="../../org/scalatest/Suite.html#suiteName" target="_self">suiteName</a>, <a href="../../org/scalatest/Suite.html#expectedTestCount%28Set%5BString%5D%2CSet%5BString%5D%29" target="_self">expectedTestCount</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="../../org/scalatest/Assertions.html" target="_self">Assertions</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="../../org/scalatest/Assertions.html#assert%28Boolean%29" target="_self">assert</a>, <a href="../../org/scalatest/Assertions.html#assert%28Boolean%2CAny%29" target="_self">assert</a>, <a href="../../org/scalatest/Assertions.html#assert%28Option%5BString%5D%2CAny%29" target="_self">assert</a>, <a href="../../org/scalatest/Assertions.html#assert%28Option%5BString%5D%29" target="_self">assert</a>, <a href="../../org/scalatest/Assertions.html#convertToEqualizer%28Any%29" target="_self">convertToEqualizer</a>, <a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%2CAny%29" target="_self">intercept</a>, <a href="../../org/scalatest/Assertions.html#intercept%28java.lang.Class%5BT%5D%29" target="_self">intercept</a>, <a href="../../org/scalatest/Assertions.html#intercept%28%3D%3EAny%29" target="_self">intercept</a>, <a href="../../org/scalatest/Assertions.html#expect%28Any%2CAny%29" target="_self">expect</a>, <a href="../../org/scalatest/Assertions.html#expect%28Any%29" target="_self">expect</a>, <a href="../../org/scalatest/Assertions.html#fail%28%29" target="_self">fail</a>, <a href="../../org/scalatest/Assertions.html#fail%28String%29" target="_self">fail</a>, <a href="../../org/scalatest/Assertions.html#fail%28String%2CThrowable%29" target="_self">fail</a>, <a href="../../org/scalatest/Assertions.html#fail%28Throwable%29" target="_self">fail</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html" target="_self">AnyRef</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#getClass%28%29" target="_self">getClass</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#hashCode%28%29" target="_self">hashCode</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#equals%28Any%29" target="_self">equals</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#clone%28%29" target="_self">clone</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#toString%28%29" target="_self">toString</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#notify%28%29" target="_self">notify</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#notifyAll%28%29" target="_self">notifyAll</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28Long%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28Long%2CInt%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#wait%28%29" target="_self">wait</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#finalize%28%29" target="_self">finalize</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#%3D%3D%28AnyRef%29" target="_self">==</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#%21%3D%28AnyRef%29" target="_self">!=</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#eq%28AnyRef%29" target="_self">eq</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#ne%28AnyRef%29" target="_self">ne</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/AnyRef.html#synchronized%28T0%29" target="_self">synchronized</a>
+        </td></tr>
+      </table><table summary="" cellpadding="3" class="inherited">
+        <tr><td class="title" colspan="2">
+          Methods inherited from <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>
+        </td></tr>
+        <tr><td class="signature" colspan="2">
+          <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#%3D%3D%28Any%29" target="_self">==</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#%21%3D%28Any%29" target="_self">!=</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#isInstanceOf" target="_self">isInstanceOf</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html#asInstanceOf" target="_self">asInstanceOf</a>
+        </td></tr>
+      </table>
+
+
+      
+
+
+<table summary="" cellpadding="3" class="member-detail">
+          <tr><td class="title">Method Details</td></tr>
+        </table><div><a name="info"></a><dl>
+      <dt>
+        
+        <code>implicit</code>
+        <code>def</code>
+        <em>info</em> : <a href="../../org/scalatest/Informer.html" target="_self">Informer</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Returns an <code>Informer</code> that during test execution will forward strings (or reports) passed to its
+   apply method to the current reporter. If invoked inside a test function, it will forward the information to
+   the current reporter immediately. If invoked outside a test function, but in the primary constructor, it
+   will register the info for forwarding later during test execution. If invoked at any other time, it will
+   throw an exception.</dd></dl>
+      <dl></dl>
+    <hr></hr>
+<a name="test%28String%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code>protected</code>
+        <code>def</code>
+        <em>test</em>(<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>testGroups</em> : <a href="../../org/scalatest/Group.html" target="_self">Group</a>*)(<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test with the specified name, optional groups, and function value that takes no arguments.
+     This method will register the test for later execution via an invocation of one of the <code>execute</code>
+     methods. The passed test name must not have been registered previously on
+     this <code>FunSuite</code> instance.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if <code>testName</code> had been registered previously</dd></dl>
+    <hr></hr>
+<a name="ignore%28String%2Corg.scalatest.Group*%29"></a><dl>
+      <dt>
+        
+        <code>protected</code>
+        <code>def</code>
+        <em>ignore</em>(<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>testGroups</em> : <a href="../../org/scalatest/Group.html" target="_self">Group</a>*)(<em>f</em> : =&gt; <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Register a test to ignore, which has the specified name, optional groups, and function value that takes no arguments.
+   This method will register the test for later ignoring via an invocation of one of the <code>execute</code>
+   methods. This method exists to make it easy to ignore an existing test method by changing the call to <code>test</code>
+   to <code>ignore</code> without deleting or commenting out the actual test code. The test will not be executed, but a
+   report will be sent that indicates the test was ignored. The passed test name must not have been registered previously on
+   this <code>FunSuite</code> instance.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>TestFailedException - </code>if <code>testName</code> had been registered previously</dd></dl>
+    <hr></hr>
+<a name="testNames"></a><dl>
+      <dt>
+        
+        <code>override</code>
+        <code>def</code>
+        <em>testNames</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>]
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>An immutable <code>Set</code> of test names. If this <code>FunSuite</code> contains no tests, this method returns an empty <code>Set</code>.
+ 
+  <p>
+  This trait's implementation of this method will return a set that contains the names of all registered tests. The set's iterator will
+  return those names in the order in which the tests were registered.
+  </p></dd></dl>
+      <dl></dl>
+    <dl>
+        <dt style="margin:10px 0 0 20px;">
+          <b>Overrides</b>
+        </dt>
+        <dd>
+        <a href="../../org/scalatest/Suite.html" target="_self">Suite</a>.<a href="../../org/scalatest/Suite.html#testNames" target="_self">testNames</a>
+        </dd>
+      </dl><hr></hr>
+<a name="runTest%28String%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CMap%5BString%2CAny%5D%29"></a><dl>
+      <dt>
+        
+        <code>protected override</code>
+        <code>def</code>
+        <em>runTest</em>(<em>testName</em> : <a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <em>reporter</em> : <a href="../../org/scalatest/Reporter.html" target="_self">Reporter</a>, <em>stopper</em> : <a href="../../org/scalatest/Stopper.html" target="_self">Stopper</a>, <em>goodies</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Map">scala.collection.immutable.Map</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Run a test. This trait's implementation runs the test registered with the name specified by <code>testName</code>.</dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>testName - </code>the name of one test to execute.</dd><dd><code>reporter - </code>the <code>Reporter</code> to which results will be reported</dd><dd><code>stopper - </code>the <code>Stopper</code> that will be consulted to determine whether to stop execution early.</dd><dd><code>goodies - </code>a <code>Map</code> of properties that can be used by the executing <code>Suite</code> of tests.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if any of <code>testName</code>, <code>reporter</code>, <code>stopper</code>, or <code>goodies</code>       is <code>null</code>.</dd></dl>
+    <dl>
+        <dt style="margin:10px 0 0 20px;">
+          <b>Overrides</b>
+        </dt>
+        <dd>
+        <a href="../../org/scalatest/Suite.html" target="_self">Suite</a>.<a href="../../org/scalatest/Suite.html#runTest%28String%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CMap%5BString%2CAny%5D%29" target="_self">runTest</a>
+        </dd>
+      </dl><hr></hr>
+<a name="groups"></a><dl>
+      <dt>
+        
+        <code>override</code>
+        <code>def</code>
+        <em>groups</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Map">scala.collection.immutable.Map</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>]]
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>A <code>Map</code> whose keys are <code>String</code> group names to which tests in this <code>FunSuite</code> belong, and values
+   the <code>Set</code> of test names that belong to each group. If this <code>FunSuite</code> contains no groups, this method returns an empty <code>Map</code>.
+  
+   <p>
+   This trait's implementation returns groups that were passed as strings contained in <code>Group</code> objects passed to 
+   methods <code>test</code> and <code>ignore</code>. 
+   </p></dd></dl>
+      <dl></dl>
+    <dl>
+        <dt style="margin:10px 0 0 20px;">
+          <b>Overrides</b>
+        </dt>
+        <dd>
+        <a href="../../org/scalatest/Suite.html" target="_self">Suite</a>.<a href="../../org/scalatest/Suite.html#groups" target="_self">groups</a>
+        </dd>
+      </dl><hr></hr>
+<a name="runTests%28Option%5BString%5D%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%29"></a><dl>
+      <dt>
+        
+        <code>protected override</code>
+        <code>def</code>
+        <em>runTests</em>(<em>testName</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>reporter</em> : <a href="../../org/scalatest/Reporter.html" target="_self">Reporter</a>, <em>stopper</em> : <a href="../../org/scalatest/Stopper.html" target="_self">Stopper</a>, <em>groupsToInclude</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>groupsToExclude</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>goodies</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Map">scala.collection.immutable.Map</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd><p>
+   Run zero to many of this <code>Suite</code>'s tests.
+   </p>
+  
+   <p>
+   This method takes a <code>testName</code> parameter that optionally specifies a test to invoke.
+   If <code>testName</code> is <code>Some</code>, this trait's implementation of this method 
+   invokes <code>runTest</code> on this object, passing in:
+   </p>
+  
+   <ul>
+   <li><code>testName</code> - the <code>String</code> value of the <code>testName</code> <code>Option</code> passed
+     to this method</li>
+   <li><code>reporter</code> - the <code>Reporter</code> passed to this method, or one that wraps and delegates to it</li>
+   <li><code>stopper</code> - the <code>Stopper</code> passed to this method, or one that wraps and delegates to it</li>
+   <li><code>goodies</code> - the <code>goodies</code> <code>Map</code> passed to this method, or one that wraps and delegates to it</li>
+   </ul>
+  
+   <p>
+   This method takes a <code>Set</code> of group names that should be included (<code>groupsToInclude</code>), and a <code>Set</code>
+   that should be excluded (<code>groupsToExclude</code>), when deciding which of this <code>Suite</code>'s tests to execute.
+   If <code>groupsToInclude</code> is empty, all tests will be executed
+   except those those belonging to groups listed in the <code>groupsToExclude</code> <code>Set</code>. If <code>groupsToInclude</code> is non-empty, only tests
+   belonging to groups mentioned in <code>groupsToInclude</code>, and not mentioned in <code>groupsToExclude</code>
+   will be executed. However, if <code>testName</code> is <code>Some</code>, <code>groupsToInclude</code> and <code>groupsToExclude</code> are essentially ignored.
+   Only if <code>testName</code> is <code>None</code> will <code>groupsToInclude</code> and <code>groupsToExclude</code> be consulted to
+   determine which of the tests named in the <code>testNames</code> <code>Set</code> should be run. This trait's implementation
+   behaves this way, and it is part of the general contract of this method, so all overridden forms of this method should behave
+   this way as well.  For more information on trait groups, see the main documentation for this trait.
+   </p>
+  
+   <p>
+   If <code>testName</code> is <code>None</code>, this trait's implementation of this method
+   invokes <code>testNames</code> on this <code>Suite</code> to get a <code>Set</code> of names of tests to potentially execute.
+   (A <code>testNames</code> value of <code>None</code> essentially acts as a wildcard that means all tests in
+   this <code>Suite</code> that are selected by <code>groupsToInclude</code> and <code>groupsToExclude</code> should be executed.)
+   For each test in the <code>testName</code> <code>Set</code>, in the order
+   they appear in the iterator obtained by invoking the <code>elements</code> method on the <code>Set</code>, this trait's implementation
+   of this method checks whether the test should be run based on the <code>groupsToInclude</code> and <code>groupsToExclude</code> <code>Set</code>s.
+   If so, this implementation invokes <code>runTest</code>, passing in:
+   </p>
+  
+   <ul>
+   <li><code>testName</code> - the <code>String</code> name of the test to run (which will be one of the names in the <code>testNames</code> <code>Set</code>)</li>
+   <li><code>reporter</code> - the <code>Reporter</code> passed to this method, or one that wraps and delegates to it</li>
+   <li><code>stopper</code> - the <code>Stopper</code> passed to this method, or one that wraps and delegates to it</li>
+   <li><code>goodies</code> - the <code>goodies</code> <code>Map</code> passed to this method, or one that wraps and delegates to it</li>
+   </ul></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>testName - </code>an optional name of one test to execute. If <code>None</code>, all relevant tests should be executed.                   I.e., <code>None</code> acts like a wildcard that means execute all relevant tests in this <code>Suite</code>.</dd><dd><code>reporter - </code>the <code>Reporter</code> to which results will be reported</dd><dd><code>stopper - </code>the <code>Stopper</code> that will be consulted to determine whether to stop execution early.</dd><dd><code>groupsToInclude - </code>a <code>Set</code> of <code>String</code> group names to include in the execution of this <code>Suite</code></dd><dd><code>groupsToExclude - </code>a <code>Set</code> of <code>String</code> group names to exclude in the execution of this <code>Suite</code></dd><dd><code>goodies - </code>a <code>Map</code> of key-value pairs that can be used by the executing <code>Suite</code> of tests.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if any of <code>testName</code>, <code>reporter</code>, <code>stopper</code>, <code>groupsToInclude</code>,       <code>groupsToExclude</code>, or <code>goodies</code> is <code>null</code>.
+  
+   This trait's implementation of this method executes tests
+   in the manner described in detail in the following paragraphs, but subclasses may override the method to provide different
+   behavior. The most common reason to override this method is to set up and, if also necessary, to clean up a test fixture
+   used by all the methods of this <code>Suite</code>.</dd></dl>
+    <dl>
+        <dt style="margin:10px 0 0 20px;">
+          <b>Overrides</b>
+        </dt>
+        <dd>
+        <a href="../../org/scalatest/Suite.html" target="_self">Suite</a>.<a href="../../org/scalatest/Suite.html#runTests%28Option%5BString%5D%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%29" target="_self">runTests</a>
+        </dd>
+      </dl><hr></hr>
+<a name="execute%28Option%5BString%5D%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%2COption%5Borg.scalatest.Distributor%5D%29"></a><dl>
+      <dt>
+        
+        <code>override</code>
+        <code>def</code>
+        <em>execute</em>(<em>testName</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>reporter</em> : <a href="../../org/scalatest/Reporter.html" target="_self">Reporter</a>, <em>stopper</em> : <a href="../../org/scalatest/Stopper.html" target="_self">Stopper</a>, <em>groupsToInclude</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>groupsToExclude</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Set">scala.collection.immutable.Set</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>], <em>goodies</em> : <a href="" target="contentFrame" class="scala/collection/immutable/Map">scala.collection.immutable.Map</a>[<a href="" target="contentFrame" class="java/lang/String">java.lang.String</a>, <a href="http://www.scala-lang.org/docu/files/api/scala/Any.html" target="_self">Any</a>], <em>distributor</em> : <a href="" target="contentFrame" class="scala/Option">scala.Option</a>[<a href="../../org/scalatest/Distributor.html" target="_self">Distributor</a>]) : <a href="http://www.scala-lang.org/docu/files/api/scala/Unit.html" target="_self">Unit</a>
+      </dt>
+      <dd></dd>
+    </dl>
+      <dl><dd>Execute this <code>Suite</code>.
+  
+   <p>If <code>testName</code> is <code>None</code>, this trait's implementation of this method
+   calls these two methods on this object in this order:</p>
+  
+   <ol>
+   <li><code>runNestedSuites(wrappedReporter, stopper, groupsToInclude, groupsToExclude, goodies, distributor)</code></li>
+   <li><code>runTests(testName, wrappedReporter, stopper, groupsToInclude, groupsToExclude, goodies)</code></li>
+   </ol>
+  
+   <p>
+   If <code>testName</code> is <code>Some</code>, then this trait's implementation of this method
+   calls <code>runTests</code>, but does not call <code>runNestedSuites</code>.
+   </p></dd></dl>
+      <dl><dt style="margin:10px 0 0 20px;">
+        <b>Parameters</b></dt><dd><code>testName - </code>an optional name of one test to execute. If <code>None</code>, all relevant tests should be executed.                   I.e., <code>None</code> acts like a wildcard that means execute all relevant tests in this <code>Suite</code>.</dd><dd><code>reporter - </code>the <code>Reporter</code> to which results will be reported</dd><dd><code>stopper - </code>the <code>Stopper</code> that will be consulted to determine whether to stop execution early.</dd><dd><code>groupsToInclude - </code>a <code>Set</code> of <code>String</code> group names to include in the execution of this <code>Suite</code></dd><dd><code>groupsToExclude - </code>a <code>Set</code> of <code>String</code> group names to exclude in the execution of this <code>Suite</code></dd><dd><code>goodies - </code>a <code>Map</code> of key-value pairs that can be used by the executing <code>Suite</code> of tests.</dd><dd><code>distributor - </code>an optional <code>Distributor</code>, into which to put nested <code>Suite</code>s to be executed                by another entity, such as concurrently by a pool of threads. If <code>None</code>, nested <code>Suite</code>s will be executed sequentially.</dd><dt style="margin:10px 0 0 20px;">
+        <b>Throws</b></dt><dd><code>NullPointerException - </code>if any passed parameter is <code>null</code>.</dd></dl>
+    <dl>
+        <dt style="margin:10px 0 0 20px;">
+          <b>Overrides</b>
+        </dt>
+        <dd>
+        <a href="../../org/scalatest/Suite.html" target="_self">Suite</a>.<a href="../../org/scalatest/Suite.html#execute%28Option%5BString%5D%2Corg.scalatest.Reporter%2Corg.scalatest.Stopper%2CSet%5BString%5D%2CSet%5BString%5D%2CMap%5BString%2CAny%5D%2COption%5Borg.scalatest.Distributor%5D%29" target="_self">execute</a>
+        </dd>
+      </dl><hr></hr></div>
+
+
+    <hr></hr>
+        <div>Copyright (C) 2001-2009 Artima, Inc. All rights reserved.</div><table summary="" class="navigation">
+        <tr>
+          <td class="navigation-links" valign="top">
+            <!-- <table><tr></tr></table> -->
+          </td>
+          <td align="right" valign="top" style="white-space:nowrap;" rowspan="2">
+            <div class="doctitle-larger">ScalaTest 0.9.5</div>
+          </td>
+        </tr>
+        <tr><td></td></tr>
+      </table>
+      </body>
+      </html>
