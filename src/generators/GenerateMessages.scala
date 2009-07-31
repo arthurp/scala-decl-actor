@@ -1,66 +1,112 @@
 /*
  * GenerateMessages.scala
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
+ * (c) Arthur Peters
+ * Licensed under the LGPL v2 or later.
+ *
+ * If you want a different license talk to me.
  */
 
 package generators
 
 object GenerateMessages {
-    def genThings(i:Int)(f : (Int) => String) : String = (1 to i).map(f).mkString("", ", ", "")
+    class Message(val i:Int) {
+        protected def genThings(f : (Int) => String) : String = if(i == 0) "" else (1 to i).map(f).mkString("", ", ", "")
+        def argNames = genThings(n=> "a"+n)
+        def argsDecl = genThings(n=> "a"+n+":A"+n)
+        def typeArgNames = genThings(j=>"A" + j)
+        def tupleType = "(" + typeArgNames + ")"
+        def tupleArgsDecl = "(" + argsDecl + ")"
+        def fileName = "Message%d.scala".format(i)
+        
+        def unapplyMethod = {
+<segment>
+    def unapply(v:Any) : Option[{tupleType}] = v match {{
+        case ActorMessage(src, {tupleArgsDecl}) if src eq this => Some(({argNames}))
+        case _ => None
+    }}</segment>.text
+        }
 
-    def genArgs(i:Int) : String = genThings(i)(n=> "a"+n)
-    def genArgsDecl(i:Int) : String = genThings(i)(n=> "a"+n+":A"+n)
-    def genTypes(i:Int) : String = genThings(i)(j=>"A" + j)
-    def genTupleType(i:Int) : String = i match {
-        case 1 => genTypes(i)
-        case _ => "(" + genTypes(i) + ")"
-    }
-    def genTupleArgsDecl(i:Int) : String = i match {
-        case 1 => genArgsDecl(i)
-        case _ => "(" + genArgsDecl(i) + ")"
-    }
+        def asyncTypeArgs = "[" + typeArgNames + "]"
+        def syncTypeArgs = "[R, " + typeArgNames + "]"
 
-    def genMessage(i:Int) :String = {
-        """package scala.actors
+        def messageClass = {
+<segment>class Message{i}{asyncTypeArgs}(owner : DeclActor) extends Message(owner) {{
+{unapplyMethod}
+}}</segment>.text
+        }
+        def syncMessageClass = {
+<segment>class SyncMessage{i}{syncTypeArgs}(implicit owner : DeclActor, rClass : Manifest[R]) extends Message{i}{asyncTypeArgs}(owner) with SyncMessage[R] {{
+    def invoke({argsDecl}) : R = castReturn(owner !? ActorMessage(this, ({argNames})))
+    def apply({argsDecl}) = invoke({argNames})
+    def !?({argsDecl}) = invoke({argNames})
+
+    def invokeFuture({argsDecl}) : Future[R] = owner !! (ActorMessage(this, ({argNames})), castReturnPartialFunc)
+    def !!({argsDecl}) = invokeFuture({argNames})
+}}</segment>.text
+        }
+        def asyncMessageClass = {
+<segment>class AsyncMessage{i}{asyncTypeArgs}(implicit owner : DeclActor) extends Message{i}{asyncTypeArgs}(owner) {{
+    def send({argsDecl}) : Unit = owner ! ActorMessage(this, ({argNames}))
+    def !({argsDecl}) = send({argNames})
+}}</segment>.text
+        }
+
+
+        def apply() : String = {
+<file name={fileName}>/*
+ * {fileName}
+ *
+ * (c) Arthur Peters
+ * Licensed under the LGPL v2 or later.
+ *
+ * If you want a different license talk to me.
+ */
+
+package scala.actors
 import scala.reflect.Manifest
 
-class Message%%i%%[%%types%%](owner : DeclActor) extends Message(owner) {
-    def unapply(v:Any) : Option[%%tuple_type%%] = v match {
-        case ActorMessage(src, %%tuple_args_decl%%) if src eq this => Some((%%args%%))
-        case _ => None
+{messageClass}
+
+{syncMessageClass}
+{asyncMessageClass}
+</file>.text
+        }
     }
-}
 
-class SyncMessage%%i%%[R, %%types%%](implicit owner : DeclActor, rClass : Manifest[R]) extends Message%%i%%[%%types%%](owner) with SyncMessage[R] {
-    def invoke(%%args_decl%%) : R = castReturn(owner !? ActorMessage(this, (%%args%%)))
-    def apply(%%args_decl%%) = invoke(%%args%%)
-    def !?(%%args_decl%%) = invoke(%%args%%)
+    class MessageZero extends Message(0) {
+        override def unapplyMethod = {
+<segment>
+    def unapply(v:Any) : Boolean = v match {{
+        case ActorMessage(src, {tupleArgsDecl}) if src eq this => true
+        case _ => false
+    }}</segment>.text
+        }
 
-    def invokeFuture(%%args_decl%%) : Future[R] = owner !! (ActorMessage(this, (%%args%%)), castReturnPartialFunc)
-    def !!(%%args_decl%%) = invokeFuture(%%args%%)
-}
+        override def asyncTypeArgs = ""
+        override def syncTypeArgs = "[R]"
+    }
 
-class AsyncMessage%%i%%[%%types%%](implicit owner : DeclActor) extends Message%%i%%[%%types%%](owner) {
-    def send(%%args_decl%%) : Unit = owner ! ActorMessage(this, (%%args%%))
-    def !(%%args_decl%%) = send(%%args%%)
-}
-""".
-        replaceAll("%%types%%", genTypes(i)).
-        replaceAll("%%tuple_type%%", genTupleType(i)).
-        replaceAll("%%args_decl%%", genArgsDecl(i)).
-        replaceAll("%%args%%", genArgs(i)).
-        replaceAll("%%i%%", ""+i).
-        replaceAll("%%tuple_args_decl%%", genTupleArgsDecl(i))
+    class MessageOne extends Message(1) {
+        override def tupleType = typeArgNames
+        override def tupleArgsDecl = argsDecl
+    }
+
+    object Message {
+        def apply(i:Int) = i match {
+            case 0 => new MessageZero
+            case 1 => new MessageOne
+            case _ => new Message(i)
+        }
     }
 
     def main(args : Array[String]) {
-        for (i <- 1 to 8) {
+        for (i <- 0 to 8) {
             import java.io.{FileOutputStream, FileWriter}
-            val fname = "src/scala/actors/Message" + i + ".scala"
+            val m = Message(i)
+            val fname = "src/scala/actors/" + m.fileName
             val f = new FileWriter(fname)
-            f.write(genMessage(i))
+            f.write(m())
             f.close
         }
         println("Done")

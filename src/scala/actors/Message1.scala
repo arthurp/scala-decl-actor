@@ -1,7 +1,17 @@
+/*
+ * Message1.scala
+ *
+ * (c) Arthur Peters
+ * Licensed under the LGPL v2 or later.
+ *
+ * If you want a different license talk to me.
+ */
+
 package scala.actors
 import scala.reflect.Manifest
 
 class Message1[A1](owner : DeclActor) extends Message(owner) {
+
     def unapply(v:Any) : Option[A1] = v match {
         case ActorMessage(src, a1:A1) if src eq this => Some((a1))
         case _ => None
@@ -16,7 +26,6 @@ class SyncMessage1[R, A1](implicit owner : DeclActor, rClass : Manifest[R]) exte
     def invokeFuture(a1:A1) : Future[R] = owner !! (ActorMessage(this, (a1)), castReturnPartialFunc)
     def !!(a1:A1) = invokeFuture(a1)
 }
-
 class AsyncMessage1[A1](implicit owner : DeclActor) extends Message1[A1](owner) {
     def send(a1:A1) : Unit = owner ! ActorMessage(this, (a1))
     def !(a1:A1) = send(a1)

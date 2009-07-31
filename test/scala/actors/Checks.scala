@@ -1,8 +1,10 @@
 /*
  * Checks.scala
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
+ * (c) Arthur Peters
+ * Licensed under the LGPL v2 or later.
+ *
+ * If you want a different license talk to me.
  */
 
 package scala.actors
@@ -26,11 +28,11 @@ class Checks extends JUnit3Suite with Checkers {
         var pre = ""
 
         override def act() = while(true) { receive {
-                case sync(i) => reply( pre + "(" + i + ")" )//; println(pre + "(" + i + ")")
-                case sync2(i, j) => reply( pre + "(" + i*j + ")" )//; println(pre + "(" + i*j + ")")
+                case sync(i) => sync.reply( pre + "(" + i + ")" )//; println(pre + "(" + i + ")")
+                case sync2(i, j) => sync2.reply( pre + "(" + i*j + ")" )//; println(pre + "(" + i*j + ")")
                 case async(s) => pre = s
                 case async2(s, s2) => pre = s; lastS2 = s2
-                case done() => new RuntimeException().printStackTrace(); reply(()); exit
+                case done() => /*new RuntimeException().printStackTrace();*/ done.reply(()); exit
                 case wrongType() => reply(pre)
                 case sync8(a, b, c, d, e, f, g, h) => sync8.reply((a, b, c, d, e, f, g, h))
             } }
