@@ -99,6 +99,17 @@ class Checks extends JUnit3Suite with Checkers {
         a.done()
     }
 
+    def testName {
+        val a = new Actor1
+        a.start
+
+        import junit.framework.Assert._
+        
+        assertEquals( a.done.name.get, "done" )
+        assertEquals( a.sync2.name.get, "sync2" )
+        assertEquals( a.wrongType.name.get, "wrongType" )
+    }
+
     def testWrongType {
         val a = new Actor1
         a.start
