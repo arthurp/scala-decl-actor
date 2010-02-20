@@ -1,5 +1,6 @@
 DeclActor is a library that allows you to define the set of messages that should be
 used on an actor and use them in a type safe way. It sits on top of the default
+Scala actors library.
 
 Actors that use this feature must be derived from DeclActor. It makes no sense to 
 create an anonymous actor using this feature so I have made no attempt to integrate
@@ -45,5 +46,5 @@ For example:
     
     
 
-(c) Arthur Peters 2010
+(c) 2010 Arthur Peters
 Licensed under the LGPL v2 or later.
