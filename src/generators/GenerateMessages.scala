@@ -1,7 +1,7 @@
 /*
  * GenerateMessages.scala
  *
- * (c) Arthur Peters
+ * (c) 2010 Arthur Peters
  * Licensed under the LGPL v2 or later.
  *
  * If you want a different license talk to me.
@@ -58,7 +58,7 @@ object GenerateMessages {
 <file name={fileName}>/*
  * {fileName}
  *
- * (c) Arthur Peters
+ * (c) 2010 Arthur Peters
  * Licensed under the LGPL v2 or later.
  *
  * If you want a different license talk to me.
