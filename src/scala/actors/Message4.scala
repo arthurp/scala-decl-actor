@@ -13,12 +13,12 @@ import scala.reflect.Manifest
 class Message4[A1, A2, A3, A4](owner : DeclActor) extends Message(owner) {
 
     def unapply(v:Any) : Option[(A1, A2, A3, A4)] = v match {
-        case ActorMessage(src, (a1:A1, a2:A2, a3:A3, a4:A4)) if src eq this => Some((a1, a2, a3, a4))
+        case ActorMessage(src, (a1, a2, a3, a4)) if src eq this => Some((a1.asInstanceOf[A1], a2.asInstanceOf[A2], a3.asInstanceOf[A3], a4.asInstanceOf[A4]))
         case _ => None
     }
 }
 
-class SyncMessage4[R, A1, A2, A3, A4](implicit owner : DeclActor, rClass : Manifest[R]) extends Message4[A1, A2, A3, A4](owner) with SyncMessage[R] {
+class SyncMessage4[R, A1, A2, A3, A4](implicit owner : DeclActor, protected[this] val rClass : Manifest[R]) extends Message4[A1, A2, A3, A4](owner) with SyncMessage[R] {
     def invoke(a1:A1, a2:A2, a3:A3, a4:A4) : R = castReturn(owner !? ActorMessage(this, (a1, a2, a3, a4)))
     def apply(a1:A1, a2:A2, a3:A3, a4:A4) = invoke(a1, a2, a3, a4)
     def !?(a1:A1, a2:A2, a3:A3, a4:A4) = invoke(a1, a2, a3, a4)

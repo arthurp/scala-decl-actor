@@ -27,12 +27,9 @@ class Message(protected val owner : DeclActor) {
     */
     lazy val name : Option[String] = {
         val methods = owner.getClass.getMethods
-        //println(methods.deepToString())
         val typeMatches = methods.filter( f => (f.getReturnType eq this.getClass) && (f.getParameterTypes().size == 0) && (f.getModifiers == java.lang.reflect.Modifier.PUBLIC) )
-        //println(typeMatches.deepToString())
         val valMatches = typeMatches.filter( f => f.invoke(owner) eq this )
-        //println(valMatches.deepToString())
-        valMatches.firstOption.map(_.getName)
+        valMatches.headOption.map(_.getName)
     }
 
     override def toString() = (name map (n => getClass.getSimpleName + "<"+n+">")) getOrElse super.toString()
@@ -40,24 +37,26 @@ class Message(protected val owner : DeclActor) {
 
 trait SyncMessage[R] {
     this : Message =>
+    
+    protected[this] val rClass : Manifest[R]
 
     // a hack is needed here because Unit is erased to void in some cases.
-    private final def checkType(x:Any)(implicit rClass : Manifest[R]) = rClass.erasure.isInstance(x) || (rClass.erasure == Void.TYPE && x == ())
-    private final def throwError(x:Any)(implicit rClass : Manifest[R]) = throw new Error("Incorrect return type from " + this + " should be " + rClass + " was " + (x.asInstanceOf[AnyRef]).getClass + ".")
+    private final def checkType(x:Any) = rClass.erasure.isInstance(x) || (rClass.erasure == Void.TYPE && x == ())
+    private final def throwError(x:Any) = throw new Error("Incorrect return type from " + this + " should be " + rClass + " was " + (x.asInstanceOf[AnyRef]).getClass + ".")
 
-    protected final def castReturnPartialFunc(implicit rClass : Manifest[R]) = new PartialFunction[Any, R] {
+    protected final def castReturnPartialFunc = new PartialFunction[Any, R] {
         override def isDefinedAt(x: Any): Boolean = checkType(x)
         override def apply(x:Any): R = castReturn(x)
     }
 
-    protected final def castReturn(x:Any)(implicit rClass : Manifest[R]) = if (checkType(x)) {
+    protected final def castReturn(x:Any) = if (checkType(x)) {
         x.asInstanceOf[R]
     } else {
         throwError(x)
     }
 
     /**
-     Reply to this syncronous message. This simply calls owner.reply. However it
+     Reply to this synchronous message. This simply calls owner.reply. However it
      will statically check that the reply is of the correct type.
     */
     def reply(r:R) = owner.reply(r)
@@ -70,3 +69,4 @@ trait SyncMessage[R] {
 abstract class DeclActor extends Actor {
     implicit protected val ownerOfMessages = this;
 }
+

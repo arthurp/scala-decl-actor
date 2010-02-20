@@ -13,16 +13,17 @@ object GenerateMessages {
     class Message(val i:Int) {
         protected def genThings(f : (Int) => String) : String = if(i == 0) "" else (1 to i).map(f).mkString("", ", ", "")
         def argNames = genThings(n=> "a"+n)
+        def argsWithCasts = genThings(n=> "a"+n+".asInstanceOf[A"+n+"]")
         def argsDecl = genThings(n=> "a"+n+":A"+n)
         def typeArgNames = genThings(j=>"A" + j)
         def tupleType = "(" + typeArgNames + ")"
-        def tupleArgsDecl = "(" + argsDecl + ")"
+        def tupleArgsDecl = "(" + argNames + ")"
         def fileName = "Message%d.scala".format(i)
         
         def unapplyMethod = {
 <segment>
     def unapply(v:Any) : Option[{tupleType}] = v match {{
-        case ActorMessage(src, {tupleArgsDecl}) if src eq this => Some(({argNames}))
+        case ActorMessage(src, {tupleArgsDecl}) if src eq this => Some(({argsWithCasts}))
         case _ => None
     }}</segment>.text
         }
@@ -36,7 +37,7 @@ object GenerateMessages {
 }}</segment>.text
         }
         def syncMessageClass = {
-<segment>class SyncMessage{i}{syncTypeArgs}(implicit owner : DeclActor, rClass : Manifest[R]) extends Message{i}{asyncTypeArgs}(owner) with SyncMessage[R] {{
+<segment>class SyncMessage{i}{syncTypeArgs}(implicit owner : DeclActor, protected[this] val rClass : Manifest[R]) extends Message{i}{asyncTypeArgs}(owner) with SyncMessage[R] {{
     def invoke({argsDecl}) : R = castReturn(owner !? ActorMessage(this, ({argNames})))
     def apply({argsDecl}) = invoke({argNames})
     def !?({argsDecl}) = invoke({argNames})
@@ -89,7 +90,7 @@ import scala.reflect.Manifest
 
     class MessageOne extends Message(1) {
         override def tupleType = typeArgNames
-        override def tupleArgsDecl = argsDecl
+        override def tupleArgsDecl = argNames
     }
 
     object Message {

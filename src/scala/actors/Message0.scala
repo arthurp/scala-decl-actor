@@ -18,7 +18,7 @@ class Message0(owner : DeclActor) extends Message(owner) {
     }
 }
 
-class SyncMessage0[R](implicit owner : DeclActor, rClass : Manifest[R]) extends Message0(owner) with SyncMessage[R] {
+class SyncMessage0[R](implicit owner : DeclActor, protected[this] val rClass : Manifest[R]) extends Message0(owner) with SyncMessage[R] {
     def invoke() : R = castReturn(owner !? ActorMessage(this, ()))
     def apply() = invoke()
     def !?() = invoke()

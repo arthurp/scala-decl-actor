@@ -13,12 +13,12 @@ import scala.reflect.Manifest
 class Message1[A1](owner : DeclActor) extends Message(owner) {
 
     def unapply(v:Any) : Option[A1] = v match {
-        case ActorMessage(src, a1:A1) if src eq this => Some((a1))
+        case ActorMessage(src, a1) if src eq this => Some((a1.asInstanceOf[A1]))
         case _ => None
     }
 }
 
-class SyncMessage1[R, A1](implicit owner : DeclActor, rClass : Manifest[R]) extends Message1[A1](owner) with SyncMessage[R] {
+class SyncMessage1[R, A1](implicit owner : DeclActor, protected[this] val rClass : Manifest[R]) extends Message1[A1](owner) with SyncMessage[R] {
     def invoke(a1:A1) : R = castReturn(owner !? ActorMessage(this, (a1)))
     def apply(a1:A1) = invoke(a1)
     def !?(a1:A1) = invoke(a1)
