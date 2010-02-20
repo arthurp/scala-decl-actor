@@ -1,0 +1,49 @@
+DeclActor is a library that allows you to define the set of messages that should be
+used on an actor and use them in a type safe way. It sits on top of the default
+
+Actors that use this feature must be derived from DeclActor. It makes no sense to 
+create an anonymous actor using this feature so I have made no attempt to integrate
+with the methods Actor.actor and the like.
+
+Messages are declared as public vals on the actors class. They can be "called" or 
+sent from outside as if they were methods and inside the actors they can be matched 
+against as if they are a case class. 
+
+For example:
+
+    class Actor1 extends DeclActor {
+        val sync = new SyncMessage1[String, Int]
+        val async = new AsyncMessage1[String]
+        val whapp = new AsyncMessage0
+        val done = new SyncMessage0[Unit]
+
+		var state = ""
+
+        override def act() = loop { react {
+                case sync(i) => sync.reply( "(" + i + ")" )
+                case async(s) => state = s
+                case whapp() => println("Whapp: "+state)
+                case done() => done.reply(()); exit
+            } }
+    }
+    
+    
+    val a = new Actor1
+    a.start
+    
+    val s1 : String = a.sync(42) 
+    // Or
+    val s2 : String = a.sync !?(43) 
+    val fs : Future[String] = a.sync !!(84)
+    a.async !("test")
+    // Or
+    a.async.send("test") 
+    
+    a.whapp !()
+    
+    a.done()
+    
+    
+
+(c) Arthur Peters 2010
+Licensed under the LGPL v2 or later.
